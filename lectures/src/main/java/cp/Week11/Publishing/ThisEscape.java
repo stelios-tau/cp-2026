@@ -22,6 +22,7 @@ public class ThisEscape {
     private final int data;
 
     public ThisEscape(EventSource source) {
+        //Anonymous class! Unsafe in this case.
         source.registerListener(new EventListener() {
             public void onEvent(String message) {
                 System.out.println("📢 Event received: " + message);
@@ -43,7 +44,8 @@ public class ThisEscape {
 
         // Run event firing in a separate thread
         new Thread(() -> {
-            try { Thread.sleep(50); } catch (InterruptedException ignored) {} // Delay to allow race condition
+             // Delay to allow race condition (comment out to avoid it)
+            try { Thread.sleep(50); } catch (InterruptedException ignored) {}
             eventSource.fireEvent();
         }).start();
 
