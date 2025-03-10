@@ -1,13 +1,13 @@
 package cp.Week11.Publishing;
 
-interface EventListener {
+interface EventListenerExpl {
     void onEvent(UnsafePublisher publisher);
 }
 
 class UnsafePublisher {
     private final int data;
 
-    public UnsafePublisher(EventListener listener) {
+    public UnsafePublisher(EventListenerExpl listener) {
         listener.onEvent(this);  // ❌ `this` escapes before full initialization!
         System.out.println("🚨 `this` escaped to another thread!");
 
@@ -25,12 +25,12 @@ class UnsafePublisher {
     }
 }
 
-public class ThisEscapeExample {
+public class ThisEscapeExplicit {
     public static void main(String[] args) throws InterruptedException {
         System.out.println("🚀 Starting test...");
 
         // Shared event listener that can access `UnsafePublisher`
-        EventListener listener = new EventListener() {
+        EventListenerExpl listener = new EventListenerExpl() {
             private UnsafePublisher instance;
 
             @Override
