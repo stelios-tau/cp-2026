@@ -1,17 +1,20 @@
 package cp.Week11.Publishing;
 
 interface EventListener {
-    void onEvent();
+    void onEvent(UnsafePublisher publisher);
 }
 
 class UnsafePublisher {
     private final int data;
 
     public UnsafePublisher(EventListener listener) {
-        listener.onEvent(); // ❌ `this` escapes here!
+        listener.onEvent(this);  // ❌ `this` escapes before full initialization!
+        System.out.println("🚨 `this` escaped to another thread!");
 
-        // Simulate delayed initialization
-        try { Thread.sleep(100); } catch (InterruptedException ignored) {}
+        // Simulate a long constructor (ensures observer gets time to access `this`)
+        try { 
+            Thread.sleep(200);  
+        } catch (InterruptedException ignored) {}
 
         this.data = 42; // 🚨 Assigned *after* `this` is published!
         System.out.println("✅ Constructor finished, data initialized.");
@@ -26,36 +29,39 @@ public class ThisEscapeExample {
     public static void main(String[] args) throws InterruptedException {
         System.out.println("🚀 Starting test...");
 
-        // A shared event listener that accesses `UnsafePublisher`
+        // Shared event listener that can access `UnsafePublisher`
         EventListener listener = new EventListener() {
             private UnsafePublisher instance;
 
             @Override
-            public void onEvent() {
-                if (instance != null) {
-                    System.out.println("📢 Event received! Accessing data...");
-                    System.out.println("Data: " + instance.getData()); // ❌ Might read uninitialized value!
-                }
-            }
+            public void onEvent(UnsafePublisher publisher) {
+                this.instance = publisher; // Store reference to leaked object
 
-            public void setInstance(UnsafePublisher obj) {
-                this.instance = obj;
+                // Another thread will repeatedly try to read the object
+                new Thread(() -> {
+                    while (true) {
+                        //try { 
+                        //    Thread.sleep(1200);  
+                        //} catch (InterruptedException ignored) {}  
+                        if (instance != null) {
+                            int value = instance.getData();
+                            System.out.println("📢 Observer read data: " + value);
+                            if (value == 0) {
+                                System.out.println("❌ Data was read before full initialization!");
+                                System.exit(0);
+                            }
+                        }
+                        try {
+                            Thread.sleep(5); // Allow time for incorrect access
+                        } catch (InterruptedException ignored) {}
+                    }
+                }).start();
             }
         };
 
-        // Start a thread that will try to access the escaping object
-        Thread observer = new Thread(() -> {
-            try { Thread.sleep(50); } catch (InterruptedException ignored) {} // Delay ensures access before full init
-            listener.onEvent();
-        });
-
-        observer.start();
-
         // Create an instance that leaks `this`
         UnsafePublisher obj = new UnsafePublisher(listener);
-        ((EventListener) listener).onEvent(); // Direct access attempt
 
-        observer.join(); // Wait for observer to finish
         System.out.println("🏁 Test finished.");
     }
 }

@@ -3,6 +3,7 @@ package cp.Week11.Visibility;
 
 /*
  * Visibility issue example
+ * JVM performs optimizations in the Thread "thread"
  */
 
 class KeepsGoing extends Thread {
