@@ -552,10 +552,99 @@ public class ThisEscape
 
 \begin{frame}[fragile]
   \frametitle{Immutability}
+
+  \begin{itemize}
+  \item[\faBook]<1-> One of your most effective tools towards thread-safety.
+  \item[\faBook]<1-> An \emph{immutable} object is one whose state cannot be
+    changed after its initialization.
+  \end{itemize}
+  \begin{block}<2->{\faBriefcaseMedical\quad Important}
+    Immutable objects are always thread-safe.
+  \end{block}
+  \vspace{0.2cm}
+  \begin{block}<2->{\faBook\quad Immutability}
+    An object is immutable if the following are met:
+    \begin{enumerate}
+    \item  Its state cannot be modified after construction,
+    \item All its fields are final, and
+    \item  It is properly constructed (the this reference does not escape during
+      construction).
+    \end{enumerate}
+  \end{block}
+
+
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Techniques for safe sharing}
+  \frametitle{Immutability}
+
+  \begin{itemize}
+    \item[\faBook] Is this object immutable?
+  \end{itemize}
+
+\begin{lstlisting}[language = Java , frame = trBL , firstnumber = last ,
+escapeinside={(*@}{@*)}]
+public final class ThreeStooges {
+  private final Set<String> stooges = new HashSet<String>();
+  public ThreeStooges() {
+    stooges.add("Moe");
+    stooges.add("Larry");
+    stooges.add("Curly");
+  }
+  public boolean isStooge(String name) {
+    return stooges.contains(name);
+  }
+}
+\end{lstlisting}
+  \begin{itemize}
+  \item[\faBook]<3-> It does not matter that \texttt{stooges} is a \texttt{Set}
+    composed of mutable objects. What matters is that stooges itself is \texttt{final}.
+  \end{itemize}
+  \uncover<2->{
+    \begin{tikzpicture}[overlay, remember picture]
+      \node[xshift=10.4cm,yshift=5cm,starburst,starburst points=10,
+      align=center,fill=green!50, opacity=1,draw=pink!50, line width=2pt]
+      {\textbf{Yes}};
+    \end{tikzpicture}}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Immutability}
+
+  \begin{block}<1->{\faBriefcaseMedical\quad Important}
+    Just as it is a good practice to make all fields private unless they need
+    greater visibility, it is a good practice to make all fields final
+    unless they need to be mutable.
+  \end{block}
+  \pause
+  \vspace{0.2cm}
+  \begin{block}<1->{\faLightbulb\quad Tip}
+    Just because an object is immutable, it doesn't mean that it can't \emph{represent}
+    something mutable w.r.t. your program. You can always construct a
+    \textbf{new} object with updated values.
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Techniques for safe publishing (and sharing)}
+
+  To publish a (non-immutable) object safely, both the reference to the object
+  and the object’s state must be made visible to other threads at the same time. A properly
+  constructed object can be safely published by:
+  \begin{itemize}
+  \item[\faBook] Initializing an object reference from a static initializer;
+  \item[\faBook] Storing a reference to it into a volatile field or AtomicReference;
+  \item[\faBook] Storing a reference to it into a final field of a properly constructed
+    object; or
+  \item[\faBook] Storing a reference to it into a field that is properly guarded by a
+    lock.
+  \end{itemize}
+
+  \begin{block}<1->{\faBook\quad Remember}
+    For objects whose state is going to change after publication, to ensure it's
+    being used properly, it must be either thread-safe or guarded by a lock.
+  \end{block}
 \end{frame}
 
 \section{Designing thread-safe classes}
