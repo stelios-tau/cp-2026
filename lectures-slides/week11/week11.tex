@@ -65,6 +65,7 @@
 \usetikzlibrary{tikzmark}
 \usetikzlibrary{calc}
 \usetikzlibrary{overlay-beamer-styles}
+\usetikzlibrary{shapes.geometric}
 
 \tikzset{onslide/.code args={<#1>#2}{%
     \only<#1>{\pgfkeysalso{#2}} % \pgfkeysalso doesn't change the path
@@ -86,6 +87,7 @@
 \begin{textblock*}{100mm}(\textwidth-2cm,-0.86cm)
 \includegraphics[height=0.6cm,keepaspectratio]{../media/sdu-white.eps}
 \end{textblock*}}
+
 
 %\usepackage{tikz-cd}
 % \usepackage{wasysym}
@@ -130,9 +132,433 @@
   \tableofcontents
 \end{frame}
 
-\section{Previously, on Week 10}
+\section{Recap and introduction}
+
+\begin{frame}[fragile]
+  \frametitle{Last week's topics}
+
+  Last week, we touched upon...
+
+  \begin{itemize}
+  \item[\faBook]<1-> The fundamental problem of sharing mutable state.
+  \item[\faBook]<1-> Atomicity, i.e. the property of a sequence of
+    statements appearing \emph{indivisible} w.r.t. other threads.
+  \item[\faBook]<1-> How to achieve atomicity and protect code against
+    concurrent access by other threads using \emph{intrinsic locks}.
+  \item[\faUserInjured]<1-> Several examples of race conditions and how to fix them.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Last week vs this week}
+
+  \large{Last week was more about specific problematic patterns occuring during
+    the execution of a \emph{program}.}
+
+  \pause
+
+  \large{This week will be more about \emph{designing} software that can be
+    \emph{utilized} safely in a concurrent setting.}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{This week's topics}
+
+  This week, we will witness that
+
+  \begin{itemize}
+  \item[\faBook]<1-> Concurrency in Java subverts common sense
+    on a concurrent setting, due to \emph{visibility}.
+  \item[\faBook]<1-> Preparing to \emph{share} an object across threads
+    is not as simple as it sounds, due to timing and visibility problems.
+  \item[\faBook]<1-> Notions such as \emph{invariants}, \emph{immutability} and
+    \emph{encapsulation} play a central role in designing thread-safe classes.
+  \end{itemize}
+
+  \begin{itemize}
+  \item[\faUserInjured]<2-> We will also demonstrate all of the above in
+    examples.
+  \end{itemize}
+\end{frame}
 
 
+\section{Visibility}
+
+\begin{frame}[fragile]
+  \frametitle{More than just locking}
+
+  \begin{itemize}
+  \item[\faBook]<1-> Intrinsic locks ensure that only one thread may enter any
+    piece of code that is protected by the same lock.
+  \item[\faBook]<1-> It also has a second purpose: it makes updates in one
+    thread \emph{visible} to other threads!
+    \begin{itemize}
+    \item[\faUserInjured]<2-> Without synchronization, this might not happen!
+    \end{itemize}
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Is this thread-safe?}
+
+\begin{lstlisting}[language = Java , frame = trBL , firstnumber = last ,
+escapeinside={(*@}{@*)}]
+class KeepsGoing extends Thread {
+    boolean keepRunning = true;
+
+    public void run() {
+        while (keepRunning) {
+            doSomething();
+        }
+    }
+}
+\end{lstlisting}
+
+  \uncover<2->{
+    \begin{tikzpicture}[overlay, remember picture]
+      \node[xshift=10.4cm,yshift=3cm,starburst,starburst points=20,
+      align=center,fill=yellow, opacity=1,draw=red, line width=2pt]
+      {\textbf{No! \faSkullCrossbones}};
+    \end{tikzpicture}}
+
+  \uncover<3->{
+    \begin{itemize}
+    \item[\faUserInjured] There is no guarantee that changes to
+      \texttt{keepRunning} by other threads will be visible in this thread.
+    \item[\faBriefcaseMedical] We have to use synchronization!
+    \end{itemize}}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Visibility}
+
+  \begin{itemize}
+  \item[\faBook] The developer might expect that writes should be
+    \emph{visible} to any access that took place \emph{after} (in terms of
+    universal time) a write.
+  \item[\faUserInjured] However, this is \textbf{not} the case:
+    \begin{itemize}
+    \item[\faBook] Java does not guarantee when a write in some thread will be
+      visible to other threads.
+    \item[\faBook] \uncover<2->{Java doesn't even guarantee that writes will be visible
+      \textbf{at all}!!}
+    \end{itemize}
+  \item[\faUserInjured] The culprit here are optimization taking place by Java.
+    They are only correctness-preserving in a single-threaded environment.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Visibility and stale data}
+
+  \begin{block}{\faUserInjured\quad Stale data}
+    Accessing out-of-date data due to the state of data (i.e. a variable being
+    written upon) not being up-to-date across different threads. May lead to
+    serious correctness issues.
+  \end{block}
+  \vspace{0.2cm}
+  \begin{block}<2->{\faBriefcaseMedical\quad Solution}
+    Always use synchronization to access shared data!
+  \end{block}
+
+  \begin{itemize}
+  \item[\faBook]<2-> Synchronization causes writes to be visible across threads!
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Visibility}
+
+  \begin{center}
+    \includegraphics[height=7cm,keepaspectratio]{../media/visibility.png}
+  \end{center}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Is this thread-safe (2)}
+
+\begin{lstlisting}[language = Java , frame = trBL , firstnumber = last ,
+escapeinside={(*@}{@*)}]
+public class MutableInteger {
+    private int value;
+}
+public int get() { return value; }
+public void set(int value) { this.value = value; }
+\end{lstlisting}
+
+  \uncover<2->{
+    \begin{tikzpicture}[overlay, remember picture]
+      \node[xshift=10.4cm,yshift=3cm,starburst,starburst points=20,
+      align=center,fill=yellow, opacity=1,draw=red, line width=2pt]
+      {\textbf{No! \faSkullCrossbones}};
+    \end{tikzpicture}}
+
+  \pause
+\begin{lstlisting}[language = Java , frame = trBL , firstnumber = last ,
+escapeinside={(*@}{@*)}]
+public class MutableInteger {
+    private int value;
+}
+public int get() { return value; }
+public synchronized void set(int value) { this.value = value; }
+\end{lstlisting}
+
+  \uncover<4->{
+    \begin{tikzpicture}[overlay, remember picture]
+      \node[xshift=10.4cm,yshift=3cm,starburst,starburst points=20,
+      align=center,fill=yellow, opacity=1,draw=red, line width=2pt]
+      {\textbf{No! \faSkullCrossbones}};
+    \end{tikzpicture}}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Is this thread-safe (2)}
+
+\begin{lstlisting}[language = Java , frame = trBL , firstnumber = last ,
+escapeinside={(*@}{@*)}]
+public class MutableInteger {
+    private int value;
+}
+public synchronized int get() { return value; }
+public synchronized void set(int value) { this.value = value; }
+\end{lstlisting}
+
+  \uncover<2->{
+    \begin{tikzpicture}[overlay, remember picture]
+      \node[xshift=10.4cm,yshift=3cm,starburst,starburst points=10,
+      align=center,fill=green!50, opacity=1,draw=pink!50, line width=2pt]
+      {\textbf{Yes}};
+    \end{tikzpicture}}
+
+  \begin{itemize}
+  \item[\faBriefcaseMedical]<3-> The moral of the story is, intrinsic locks are
+    not just for synchronization, but also for \textbf{visibility}. Use them
+    when accessing shared variables, regardless if there are any apparent race
+    conditions or not.
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Out-of-thin-air safety}
+
+  \begin{itemize}
+  \item[\faBook] Staleness is not all-or-nothing
+    \begin{itemize}
+    \item[\faBook] One value might be fresh while another might be stale.
+    \end{itemize}
+  \item[\faBook] There is \textbf{almost} one thing that the developer can be sure when
+    accessing stale data.
+    \begin{itemize}
+    \item[\faBook] Any value accessed to a shared memory location was caused by
+      a write, and did not appear out of nowhere.
+    \item[\faBook] This is known as \emph{out-of-thin-air} safety.
+    \end{itemize}
+  \item<2->[\faBook] It applies to \textbf{almost} any variable out there.
+  \item<3->[\faBook] Except \texttt{double}'s and \texttt{long}'s.
+  \end{itemize}
+
+  \uncover<4->{By the way, remember DataRace.java?}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Volatility}
+
+  \begin{block}{\texttt{Volatile} variables}
+    The \texttt{volatile} modifier ensures that an attribute's value is always the same
+    when read from any thread.
+  \end{block}
+
+  \begin{itemize}
+  \item[\faBook]<1-> One sneaky way to ensure visibility is to use
+    \texttt{volatile} variables.
+  \item[\faBook]<1-> They achieve synchronization, as Java ensures that a read
+    to a volatile variable will \emph{always} return the most recent value.
+  \item[\faBook]<1-> They are neat and lightweight.
+  \item[\faBook]<1-> Like locks, they also ensure that all variables prior to
+    reading/writing a volatile varible are \emph{visible} across threads.
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Volatility}
+
+  \begin{block}{\faBook \quad Remember!}
+    Locking can guarantee both visibility and atomicity; volatile variables can
+    only guarantee visibility.
+  \end{block}
+
+  You should use volatile variables only when all the following criteria are met:
+
+  \begin{itemize}
+  \item[\faBook]<1-> Writes to the variable do not depend on its current value,
+    or you can ensure that only a single thread ever updates the value;
+  \item[\faBook]<1-> The variable does not participate in invariants with other
+    state variables, and
+  \item[\faBook]<1-> Locking is not required for any other reason while the variable is being
+    accessed.
+  \end{itemize}
+
+\end{frame}
+
+\section{Publishing and sharing}
+
+\begin{frame}[fragile]
+  \frametitle{Publishing an object}
+
+  \begin{itemize}
+  \item[\faBook]<1-> You publish an object when it becomes available outside
+    each scope, e.g. by passing its reference around.
+  \item[\faBook]<1-> It is easy to inadvertently publish an object, so it is
+    important to understand when publishing happens.
+    \begin{itemize}
+    \item[\faBook]<2-> We say that such objects have \emph{escaped}.
+    \end{itemize}
+  \item[\faUserInjured]<1-> There are also various pitfalls associated with
+    publishing in a concurrent setting.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Publishing an object}
+
+  \begin{itemize}
+  \item[\faBook]<1-> Publishing an object can be as simple as using a public variable.
+  \end{itemize}
+\begin{lstlisting}[language = Java , frame = trBL , firstnumber = last ,
+escapeinside={(*@}{@*)}]
+public static Set<Secret> knownSecrets;
+public void initialize() {
+    knownSecrets = new HashSet<Secret>();
+}
+\end{lstlisting}
+  \pause
+  \begin{itemize}
+  \item[\faBook]<1-> Or returning an object.
+  \end{itemize}
+\begin{lstlisting}[language = Java , frame = trBL , firstnumber = last ,
+escapeinside={(*@}{@*)}]
+class UnsafeStates {
+    private String[] states = 
+        new String[] {"AK", "AL" ...};
+    public String[] getStates() { return states; }
+}
+\end{lstlisting}
+  \uncover<3->{
+    \begin{tikzpicture}[overlay, remember picture]
+      \node[xshift=10.4cm,yshift=3cm,starburst,starburst points=40,
+      align=center,fill=yellow, opacity=1,draw=red, line width=2pt]
+      {\textbf{A \texttt{private} var gone public \faSkullCrossbones!}};
+    \end{tikzpicture}}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Publishing an object}
+
+  \begin{itemize}
+  \item[\faBook]<1-> All the way to rather obscure ways.
+  \end{itemize}
+\begin{lstlisting}[language = Java , frame = trBL , firstnumber = last ,
+escapeinside={(*@}{@*)}]
+public class ThisEscape {
+    public ThisEscape(EventSource source) {
+        source.registerListener(
+            new EventListener() {
+                public void onEvent(Event e) {
+                    doSomething(e);
+                }
+            });
+    }
+}
+\end{lstlisting}
+  \uncover<2->{
+    \begin{tikzpicture}[overlay, remember picture]
+      \node[xshift=10.4cm,yshift=2cm,starburst,starburst points=30,
+      align=center,fill=yellow, opacity=1,draw=red, line width=2pt]
+      {\textbf{\texttt{this} escape! \faSkullCrossbones}};
+    \end{tikzpicture}}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{\texttt{this} escape}
+
+\begin{lstlisting}[language = Java , frame = trBL , firstnumber = last ,
+escapeinside={(*@}{@*)}]
+public class ThisEscape
+    public ThisEscape(EventSource source)
+        source.registerListener(
+            new EventListener()
+                public void onEvent(Event e)
+                    doSomething(e);)
+\end{lstlisting}
+
+  \begin{itemize}
+  \item[\faBook]<1-> After the \texttt{new} keyword, an anonymous class is being
+    created, implementing \texttt{EventListener}.
+  \item[\faBook]<2-> This class is shared to \texttt{source.registerListener}.
+  \item[\faBook]<3-> Inner classes carry an implicit reference to \texttt{this}.
+  \item[\faBook]<4-> Hence, \texttt{this} is shared... \pause in its
+    \textbf{constructor} \faSkullCrossbones!
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{\texttt{this} escape (in constructor)}
+
+\begin{lstlisting}[language = Java , frame = trBL , firstnumber = last ,
+escapeinside={(*@}{@*)}]
+public class ThisEscape
+    public ThisEscape(EventSource source)
+        source.registerListener(
+            new EventListener()
+                public void onEvent(Event e)
+                    doSomething(e);)
+\end{lstlisting}
+
+  \begin{block}{\texttt{\faBook} Important!}
+    Do not allow the this reference to escape during construction. Another
+    thread might get a hold of an object before it is properly initialized.
+  \end{block}
+
+  \begin{itemize}
+  \item[\faBriefcaseMedical] A solution could(!) be to initalize the object in
+    static method.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{How not to share}
+
+  \begin{block}{Pro tip (ad-hoc confinement)}
+    If you can \emph{ensure} that an object always stays within a thread, no
+    synchronization is needed.
+  \end{block}
+  \vspace{0.2cm}
+  \begin{block}{Stack confinement}
+    Making sures objects can only be reached through local variables. As local
+    variables are intrinsically tied to the execution of a thread, they cannot escape.
+  \end{block}
+  \vspace{0.2cm}
+  \begin{block}{ThreadLocal confinement}
+    Programmatic way to ensure that each thread keeps its own version of the object.
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Immutability}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Techniques for safe sharing}
+\end{frame}
+
+\section{Designing thread-safe classes}
 
 \begin{frame}{}
   \centering \huge

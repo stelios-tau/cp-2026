@@ -1,5 +1,9 @@
 package cp.Week11.Publishing;
 
+/*
+ * Safe publication via factory. Immutability is at play here.
+ */
+
 interface EventListenerSafe {
     void onEvent(String message);
 }
@@ -19,7 +23,7 @@ class EventSourceSafe {
 }
 
 public class SafeThisEscape {
-    private final int data;
+    private final int data; //Final data are important
 
     private SafeThisEscape(EventSourceSafe source) { // ✅ Private constructor prevents direct instantiation
         this.data = 42; // ✅ Fully initialized before registering the listener

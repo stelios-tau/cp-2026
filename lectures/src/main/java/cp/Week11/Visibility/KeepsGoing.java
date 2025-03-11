@@ -7,7 +7,7 @@ package cp.Week11.Visibility;
  */
 
 class KeepsGoing extends Thread {
-    boolean keepRunning = true; // Not volatile!
+    boolean keepRunning = true;
 
     public void run() {
         System.out.println("🟢 " + Thread.currentThread().getName() + " started...");
