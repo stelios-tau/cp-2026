@@ -152,7 +152,7 @@
 \begin{frame}[fragile]
   \frametitle{Last week vs this week}
 
-  \large{Last week was more about specific problematic patterns occuring during
+  \large{Last week was more about specific problematic patterns occurring during
     the execution of a \emph{program}.}
 
   \pause
@@ -383,7 +383,7 @@ public synchronized void set(int value) { this.value = value; }
     to a volatile variable will \emph{always} return the most recent value.
   \item[\faBook]<1-> They are neat and lightweight.
   \item[\faBook]<1-> Like locks, they also ensure that all variables prior to
-    reading/writing a volatile varible are \emph{visible} across threads.
+    reading/writing a volatile variable are \emph{visible} across threads.
   \end{itemize}
 
 \end{frame}
@@ -416,7 +416,7 @@ public synchronized void set(int value) { this.value = value; }
 
   \begin{itemize}
   \item[\faBook]<1-> You publish an object when it becomes available outside
-    each scope, e.g. by passing its reference around.
+    its scope, e.g. by passing its reference around.
   \item[\faBook]<1-> It is easy to inadvertently publish an object, so it is
     important to understand when publishing happens.
     \begin{itemize}
@@ -529,7 +529,7 @@ public class ThisEscape
   \end{block}
 
   \begin{itemize}
-  \item[\faBriefcaseMedical] A solution could(!) be to initalize the object in
+  \item[\faBriefcaseMedical] A solution could(!) be to initialize the object in
     static method.
   \end{itemize}
 \end{frame}
@@ -543,7 +543,7 @@ public class ThisEscape
   \end{block}
   \vspace{0.2cm}
   \begin{block}{Stack confinement}
-    Making sures objects can only be reached through local variables. As local
+    Making sure objects can only be reached through local variables. As local
     variables are intrinsically tied to the execution of a thread, they cannot escape.
   \end{block}
   \vspace{0.2cm}
@@ -900,7 +900,7 @@ escapeinside={(*@}{@*)}]
   \end{itemize}
 
   \begin{itemize}
-  \item[\faCode]<1-> Also revisisted Week10/DataRace.java: example of a Data
+  \item[\faCode]<1-> Also revisited Week10/DataRace.java: example of a Data
     Race due to operation on \texttt{long} being non-atomic.
   \end{itemize}
 \end{frame}
