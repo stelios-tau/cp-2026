@@ -649,6 +649,171 @@ public final class ThreeStooges {
 
 \section{Designing thread-safe classes}
 
+\begin{frame}[fragile]
+  \frametitle{Complex invariants}
+
+\begin{lstlisting}[language = Java , frame = trBL , firstnumber = last ,
+escapeinside={(*@}{@*)}]
+  class NumberRange {
+    private int min, max;
+
+    public void setMin(int newMin) {
+      if (newMin <= max)
+           min = newMin;
+    }
+    public void setMax(int newMax) {
+      if (newMax >= min)
+           max = newMax;
+    }
+    public int getMin() { return min; }
+    public int getMax() { return max; }
+  }
+\end{lstlisting}
+  \uncover<2->{
+    \begin{tikzpicture}[overlay, remember picture]
+      \node[xshift=10.4cm,yshift=4cm,starburst,starburst points=20,
+      align=center,fill=yellow, opacity=1,draw=red, line width=2pt]
+      {\textbf{Not thread-safe!}};
+    \end{tikzpicture}}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Complex invariants}
+
+  \begin{itemize}
+  \item[\faBook]<1-> Class \texttt{NumberRange} is not thread safe.
+  \item[\faBook]<1-> No synchronization is used.
+  \item[\faBook]<1-> The invariants are \emph{implicit}, i.e. no explanation is
+    provided.
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Complex invariants (cont)}
+
+\begin{lstlisting}[language = Java , frame = trBL , firstnumber = last ,
+escapeinside={(*@}{@*)}]
+class AtomicNumberRange {
+    private final AtomicInteger min = new AtomicInteger(0);
+    private final AtomicInteger max = new AtomicInteger(100);
+
+    public void setMin(int newMin) {
+        if (newMin <= max.get())
+            min.set(newMin);
+    }
+    public void setMax(int newMax) {
+        if (newMax >= min.get())
+            max.set(newMax);
+    }
+    public int getMin() { return min.get(); }
+    public int getMax() { return max.get(); }
+}
+\end{lstlisting}
+  \uncover<2->{
+    \begin{tikzpicture}[overlay, remember picture]
+      \node[xshift=10.4cm,yshift=4cm,starburst,starburst points=20,
+      align=center,fill=yellow, opacity=1,draw=red, line width=2pt]
+      {\textbf{Not thread-safe!}};
+    \end{tikzpicture}}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Bad delegation}
+
+  \begin{itemize}
+  \item[\faBook]<1-> Class \texttt{AtomicNumberRange} is not thread safe.
+  \item[\faBook]<1-> The developer is trying to \emph{delegate} thread safety to
+    elements of the state space of the class itself.
+  \item[\faBook]<1-> It doesn't work because the two variables are
+    \textbf{interdependent}.
+  \end{itemize}
+  \vspace{0.2cm}
+  \begin{block}<1->{\faLightbulb\quad Tip}
+    If a class is composed of multiple independent thread-safe state variables
+    and has no operations that have any invalid state transitions, then it can
+    delegate thread safety to the underlying state variables.
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Good delegation}
+
+\begin{lstlisting}[language = Java , frame = trBL , firstnumber = last ,
+escapeinside={(*@}{@*)}]
+class SafeCounter {
+  private final AtomicInteger count = new AtomicInteger(0);
+
+  public void increment() {
+    count.incrementAndGet();
+  }
+
+  public int getCount() {
+    return count.get();
+  }
+}
+\end{lstlisting}
+  \begin{itemize}
+  \item[\faBook]<2-> The state-space is a single variable, and hence independent.
+  \end{itemize}
+  \uncover<2->{
+    \begin{tikzpicture}[overlay, remember picture]
+      \node[xshift=10.4cm,yshift=4cm,starburst,starburst points=20,
+      align=center,fill=green!50, opacity=1,draw=pink!50, line width=2pt]
+      {\textbf{Thread-safe class!}};
+    \end{tikzpicture}}
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+  \frametitle{Complex invariants (cont.)}
+
+\begin{lstlisting}[language = Java , frame = trBL , firstnumber = last ,
+escapeinside={(*@}{@*)}]
+  class SafeNumberRange {
+    private int min, max;
+
+    public synchronized void setMin(int newMin) {
+      if (newMin <= max)
+           min = newMin;
+    }
+    public synchronized void setMax(int newMax) {
+      if (newMax >= min)
+           max = newMax;
+    }
+    public synchronized int getMin() { return min; }
+    public synchronized int getMax() { return max; }
+  }
+\end{lstlisting}
+  \uncover<2->{
+    \begin{tikzpicture}[overlay, remember picture]
+      \node[xshift=10.4cm,yshift=4cm,starburst,starburst points=20,
+      align=center,fill=green!50, opacity=1,draw=pink!50, line width=2pt]
+      {\textbf{Thread-safe class!}};
+    \end{tikzpicture}}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{The Monitor pattern}
+
+  \begin{itemize}
+  \item[\faBook]<1-> Class \texttt{AtomicNumberRange} is not thread safe.
+  \item[\faBook]<1-> The developer is trying to \emph{delegate} thread safety to
+    elements of the state space of the class itself.
+  \item[\faBook]<1-> It doesn't work because the two variables are
+    \textbf{interdependent}.
+  \end{itemize}
+  \vspace{0.2cm}
+  \begin{block}<1->{\faLightbulb\quad Tip}
+    If a class is composed of multiple independent thread-safe state variables
+    and has no operations that have any invalid state transitions, then it can
+    delegate thread safety to the underlying state variables.
+  \end{block}
+\end{frame}
+
+
 \begin{frame}{}
   \centering \huge
   Thank you!
