@@ -152,7 +152,7 @@
 \begin{frame}[fragile]
   \frametitle{Last week vs this week}
 
-  \large{Last week was more about specific problematic patterns occuring during
+  \large{Last week was more about specific problematic patterns occurring during
     the execution of a \emph{program}.}
 
   \pause
@@ -168,7 +168,7 @@
   This week, we will witness that
 
   \begin{itemize}
-  \item[\faBook]<1-> Concurrency in Java subverts common sense
+  \item[\faBook]<1-> Java subverts common sense
     on a concurrent setting, due to \emph{visibility}.
   \item[\faBook]<1-> Preparing to \emph{share} an object across threads
     is not as simple as it sounds, due to timing and visibility problems.
@@ -216,6 +216,12 @@ class KeepsGoing extends Thread {
 }
 \end{lstlisting}
 
+    \uncover<3->{
+    \begin{itemize}
+    \item[\faUserInjured] There is no guarantee that changes to
+      \texttt{keepRunning} by other threads will be visible in this thread.
+    \item[\faBriefcaseMedical] We have to use synchronization!
+    \end{itemize}}
   \uncover<2->{
     \begin{tikzpicture}[overlay, remember picture]
       \node[xshift=10.4cm,yshift=3cm,starburst,starburst points=20,
@@ -223,12 +229,7 @@ class KeepsGoing extends Thread {
       {\textbf{No! \faSkullCrossbones}};
     \end{tikzpicture}}
 
-  \uncover<3->{
-    \begin{itemize}
-    \item[\faUserInjured] There is no guarantee that changes to
-      \texttt{keepRunning} by other threads will be visible in this thread.
-    \item[\faBriefcaseMedical] We have to use synchronization!
-    \end{itemize}}
+
 
 \end{frame}
 
@@ -285,29 +286,31 @@ class KeepsGoing extends Thread {
 escapeinside={(*@}{@*)}]
 public class MutableInteger {
     private int value;
-}
+
 public int get() { return value; }
 public void set(int value) { this.value = value; }
+}
 \end{lstlisting}
 
-  \uncover<2->{
+  \pause
     \begin{tikzpicture}[overlay, remember picture]
       \node[xshift=10.4cm,yshift=3cm,starburst,starburst points=20,
       align=center,fill=yellow, opacity=1,draw=red, line width=2pt]
       {\textbf{No! \faSkullCrossbones}};
-    \end{tikzpicture}}
+    \end{tikzpicture}
 
   \pause
 \begin{lstlisting}[language = Java , frame = trBL , firstnumber = last ,
 escapeinside={(*@}{@*)}]
 public class MutableInteger {
     private int value;
-}
+
 public int get() { return value; }
 public synchronized void set(int value) { this.value = value; }
+}
 \end{lstlisting}
 
-  \uncover<4->{
+  \uncover<3->{
     \begin{tikzpicture}[overlay, remember picture]
       \node[xshift=10.4cm,yshift=3cm,starburst,starburst points=20,
       align=center,fill=yellow, opacity=1,draw=red, line width=2pt]
@@ -322,25 +325,24 @@ public synchronized void set(int value) { this.value = value; }
 escapeinside={(*@}{@*)}]
 public class MutableInteger {
     private int value;
-}
+
 public synchronized int get() { return value; }
 public synchronized void set(int value) { this.value = value; }
+}
 \end{lstlisting}
 
+    \begin{itemize}
+  \item[\faBriefcaseMedical]<3-> The moral of the story is, intrinsic locks are
+    not just for synchronization, but also for \textbf{visibility}. Use them
+    when accessing shared variables, regardless if there are any apparent race
+    conditions or not.
+  \end{itemize}
   \uncover<2->{
     \begin{tikzpicture}[overlay, remember picture]
       \node[xshift=10.4cm,yshift=3cm,starburst,starburst points=10,
       align=center,fill=green!50, opacity=1,draw=pink!50, line width=2pt]
       {\textbf{Yes}};
     \end{tikzpicture}}
-
-  \begin{itemize}
-  \item[\faBriefcaseMedical]<3-> The moral of the story is, intrinsic locks are
-    not just for synchronization, but also for \textbf{visibility}. Use them
-    when accessing shared variables, regardless if there are any apparent race
-    conditions or not.
-  \end{itemize}
-
 \end{frame}
 
 \begin{frame}[fragile]
@@ -381,7 +383,7 @@ public synchronized void set(int value) { this.value = value; }
     to a volatile variable will \emph{always} return the most recent value.
   \item[\faBook]<1-> They are neat and lightweight.
   \item[\faBook]<1-> Like locks, they also ensure that all variables prior to
-    reading/writing a volatile varible are \emph{visible} across threads.
+    reading/writing a volatile variable are \emph{visible} across threads.
   \end{itemize}
 
 \end{frame}
@@ -414,7 +416,7 @@ public synchronized void set(int value) { this.value = value; }
 
   \begin{itemize}
   \item[\faBook]<1-> You publish an object when it becomes available outside
-    each scope, e.g. by passing its reference around.
+    its scope, e.g. by passing its reference around.
   \item[\faBook]<1-> It is easy to inadvertently publish an object, so it is
     important to understand when publishing happens.
     \begin{itemize}
@@ -445,7 +447,7 @@ public void initialize() {
 \begin{lstlisting}[language = Java , frame = trBL , firstnumber = last ,
 escapeinside={(*@}{@*)}]
 class UnsafeStates {
-    private String[] states = 
+    private String[] states =
         new String[] {"AK", "AL" ...};
     public String[] getStates() { return states; }
 }
@@ -527,7 +529,7 @@ public class ThisEscape
   \end{block}
 
   \begin{itemize}
-  \item[\faBriefcaseMedical] A solution could(!) be to initalize the object in
+  \item[\faBriefcaseMedical] A solution could(!) be to initialize the object in
     static method.
   \end{itemize}
 \end{frame}
@@ -541,7 +543,7 @@ public class ThisEscape
   \end{block}
   \vspace{0.2cm}
   \begin{block}{Stack confinement}
-    Making sures objects can only be reached through local variables. As local
+    Making sure objects can only be reached through local variables. As local
     variables are intrinsically tied to the execution of a thread, they cannot escape.
   \end{block}
   \vspace{0.2cm}
@@ -648,6 +650,72 @@ public final class ThreeStooges {
 \end{frame}
 
 \section{Designing thread-safe classes}
+
+\begin{frame}[fragile]
+  \frametitle{Fundamental principles}
+
+  The design process for a thread-safe class should
+  include these three basic elements:
+
+  \begin{itemize}
+  \item[\faBook]<1-> Identify the object's \emph{state}, or \emph{state-space},
+    i.e. its variables.
+  \item[\faBook]<1-> Identify the \textbf{invariants}, meaning inherent
+    properties of the state-space, that constraint its state-space
+    during execution.
+  \item[\faBook]<1-> Establish a synchronization policy so that concurrent
+    access to  the object does not violate its invariants.
+  \end{itemize}
+
+  \pause
+    \vspace{0.2cm}
+    \begin{block}<1->{\faLightbulb\quad Tip}
+      Encapsulation of state is your friend!
+  \end{block}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Simple invariants}
+
+\begin{lstlisting}[language = Java , frame = trBL , firstnumber = last ,
+escapeinside={(*@}{@*)}]
+class SharedCounter {
+    private int count = 0;
+
+    public void increment() {
+        count++;
+    }
+    public int getCount() { return count; }
+}
+\end{lstlisting}
+    \begin{itemize}
+  \item[\faBook]<2-> The state of SharedCounter is composed of count, and is
+    already \textbf{encapsulated}.
+  \item[\faBook]<2-> The implicit invariant that an increment should be atomic.
+  \item[\faBook]<2-> Which policy should be used?
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Simple invariants}
+
+\begin{lstlisting}[language = Java , frame = trBL , firstnumber = last ,
+escapeinside={(*@}{@*)}]
+class SharedCounter {
+    private int count = 0;
+
+    public synchronized void increment() {
+        count++;
+    }
+    public synchronized int getCount() { return count; }
+}
+\end{lstlisting}
+    \begin{itemize}
+  \item[\faBook]<1-> One idea is to use intrinsic locking to protect the
+    increment operation (will do for now).
+  \end{itemize}
+\end{frame}
 
 \begin{frame}[fragile]
   \frametitle{Complex invariants}
@@ -799,20 +867,43 @@ escapeinside={(*@}{@*)}]
   \frametitle{The Monitor pattern}
 
   \begin{itemize}
-  \item[\faBook]<1-> Class \texttt{AtomicNumberRange} is not thread safe.
-  \item[\faBook]<1-> The developer is trying to \emph{delegate} thread safety to
-    elements of the state space of the class itself.
-  \item[\faBook]<1-> It doesn't work because the two variables are
-    \textbf{interdependent}.
+  \item[\faBook]<1-> Encapsulate all shared state.
+  \item[\faBook]<1-> Use the same lock for \textbf{all} access to the shared state.
   \end{itemize}
   \vspace{0.2cm}
   \begin{block}<1->{\faLightbulb\quad Tip}
-    If a class is composed of multiple independent thread-safe state variables
-    and has no operations that have any invalid state transitions, then it can
-    delegate thread safety to the underlying state variables.
+    Simple, yet effective.
+  \end{block}
+  \pause
+  \begin{block}<1->{\faLightbulb\quad Tip}
+      You could also try to use another, internal lock, in case a publicly
+      accessible lock (like in the previous example) may cause liveness issues.
   \end{block}
 \end{frame}
 
+\begin{frame}[fragile]
+  \frametitle{Code Listings}
+
+  \begin{itemize}
+  \item[\faCode]<1-> Visibility/Keepsgoing.java: example of visibility issue.
+  \item[\faCode]<1-> Visibility/KeepsgoingFixed.java: fixed version of the above
+    using sync.
+  \item[\faCode]<1-> Visibility/Stale.java: more involved example on visibility,
+    with two variables.
+  \item[\faCode]<1-> Visibility/StaleFixed.java: one (of many) fixed version of
+    the above.
+  \item[\faCode]<1-> Publishing/ThisEscape*.java: examples on the unsafe publishing of \texttt{this}.
+  \item[\faCode]<1-> Publishing/SafeThisEscape.java: example on the safe publishing of \texttt{this}.
+  \item[\faCode]<1-> Design/GasTankRaceDemo.java: our familiar example on a
+    compound invariant.
+  \item[\faCode]<1-> Design/GasTankFixed.java: a fixed version of the above.
+  \end{itemize}
+
+  \begin{itemize}
+  \item[\faCode]<1-> Also revisited Week10/DataRace.java: example of a Data
+    Race due to operation on \texttt{long} being non-atomic.
+  \end{itemize}
+\end{frame}
 
 \begin{frame}{}
   \centering \huge
