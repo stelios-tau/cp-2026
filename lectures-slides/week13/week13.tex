@@ -260,7 +260,52 @@
 \begin{frame}[fragile]
   \frametitle{Busy-wait}
 
-  
+\begin{lstlisting}[language = Java , frame = trBL , firstnumber = last ,
+escapeinside={(*@}{@*)}]
+while ((something) == 0) {
+        /* do nothing - just keep checking over and over */
+    }
+
+doSomething();
+\end{lstlisting}
+
+  \begin{block}<1->{\faLightbulb \quad Key idea}
+    Wait -- and keep checking -- until a condition is met.
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Spinlock vs Synchronized (Blocking)}
+  \begin{table}[]
+    \centering
+    \begin{tabular}{l|l|l}
+        \toprule
+      \textbf{}
+      & \textbf{Spinlock}
+      & \textbf{Synchronized / Blocking Lock} \\
+        \midrule
+      \textbf{Behavior}
+      & Active waiting (spins)
+      & Passive waiting (thread blocks)\\
+        \midrule
+      \textbf{CPU Usage}
+      & High during contention
+      & Low (thread sleeps)\\
+        \midrule
+      \textbf{Context switch}
+      & Avoided (keeps spinning)
+      & Incurred (expensive) \\
+        \midrule
+      \textbf{Best for}
+      & Low-contention, short tasks
+      & Longer critical sections \\
+        \bottomrule
+    \end{tabular}
+  \end{table}
+
+  \begin{block}<2->{\faExclamationTriangle \quad Important}
+    Spinlocks waste CPU if contention is high!
+  \end{block}
 \end{frame}
 
 \section{Latches}
