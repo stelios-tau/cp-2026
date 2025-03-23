@@ -1,0 +1,276 @@
+
+\PassOptionsToPackage{colorlinks,linkcolor={blue},citecolor={blue},urlcolor={blue},breaklinks=true,final}{hyperref}
+\PassOptionsToPackage{dvipsnames}{xcolor}
+\documentclass[xcolor={dvipsnames,svgnames},aspectratio=169]{beamer}
+
+\usepackage{fontawesome5}
+\usepackage{booktabs} % For better table formatting
+\usepackage{listings}
+
+\lstset{
+  tabsize = 4, %% set tab space width
+  showstringspaces = false, %% prevent space marking in strings, string is defined as the text that is generally printed directly to the console
+  numbers = left, %% display line numbers on the left
+  commentstyle = \color{purple!60}, %% set comment color
+  keywordstyle = \color{blue}, %% set keyword color
+  stringstyle = \color{red}, %% set string color
+  rulecolor = \color{black}, %% set frame color to avoid being affected by text color
+  basicstyle = \small \ttfamily , %% set listing font and size
+  breaklines = true, %% enable line breaking
+  numberstyle = \tiny,
+}
+
+\title{Concurrent Programming}
+\subtitle{Week 13 (Lecture 5)}
+\author{Stelios Tsampas}
+\institute{
+  \faEnvelope \; stelios@imada.sdu.dk
+  \qquad
+  \faGlobe \;
+  \href{https://www.steliostsampas.com}{https://www.steliostsampas.com}
+  \\\\\
+  \faGithub \; stelios-tau/cp-2025
+  \qquad\;\;
+    \faDiscord \; cp-2025
+}
+\date{\today}
+
+\titlegraphic{\includegraphics[height=0.6cm,keepaspectratio]{../media/sdu-black.eps}}
+
+\usetheme[block=fill]{metropolis}
+
+
+%\usepackage{pres-common}
+\usepackage{textpos}
+\usepackage{centernot}
+
+% \newcommand{\Goesv}[3]{\ensuremath{#1 \xRightarrow{~#3~} #2}}
+% \newcommand{\goesv}[3]{\ensuremath{#1 \xrightarrow{~#3~} #2}}
+
+% \usepackage{etex}
+% \usepackage{semantic}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{tikz}
+\usepackage{hyperref}
+
+\usetikzlibrary{arrows,shapes,matrix}
+\usetikzlibrary{backgrounds}
+\usetikzlibrary{positioning}
+\usetikzlibrary{automata}
+\usetikzlibrary{mindmap}
+\usetikzlibrary{shapes.callouts}
+\usetikzlibrary{decorations.text}
+\usetikzlibrary{tikzmark}
+\usetikzlibrary{calc}
+\usetikzlibrary{overlay-beamer-styles}
+\usetikzlibrary{shapes.geometric}
+
+\tikzset{onslide/.code args={<#1>#2}{%
+    \only<#1>{\pgfkeysalso{#2}} % \pgfkeysalso doesn't change the path
+  }}
+
+\setbeamercolor{mygray}{bg=Gray!20}
+
+\tikzset{temporal/.code args={<#1>#2#3#4}{%
+    \temporal<#1>{\pgfkeysalso{#2}}{\pgfkeysalso{#3}}{\pgfkeysalso{#4}} % \pgfkeysalso doesn't change the path
+  }}
+
+\tikzstyle{highlight}=[fill=green!50]
+\tikzstyle{hgreen}=[fill=green!20]
+\tikzstyle{hred}=[fill=red!50]
+\tikzstyle{hblue}=[fill=blue!50]
+\tikzstyle{hgray}=[fill=gray!50]
+
+\addtobeamertemplate{frametitle}{}{%
+\begin{textblock*}{100mm}(\textwidth-2cm,-0.86cm)
+\includegraphics[height=0.6cm,keepaspectratio]{../media/sdu-white.eps}
+\end{textblock*}}
+
+
+%\usepackage{tikz-cd}
+% \usepackage{wasysym}
+% \usepackage{color}
+% \usepackage[matrix,arrow]{xy}
+% \xyoption{all}
+% \SelectTips{cm}{}
+% % \usepackage{cite}
+% \usepackage{amsthm}
+% \usepackage{amsmath}
+% \usepackage{bbold}
+% % \usepackage[bbgreekl]{mathbbol}
+% \usepackage{amssymb}
+% \usepackage{pifont}
+% \usepackage{mathtools}
+% \usepackage{amsbsy}
+% % \usepackage{paralist}
+% \usepackage{shadethm}
+% % \usepackage{fancyhdr}
+% \usepackage{stmaryrd}
+% \usepackage{wasysym}
+% \usepackage{graphicx}
+% \usepackage{tabularx}
+% \usepackage{dsfont}
+% \usepackage{ulem}
+
+
+
+
+%\bibliography{mainBiblio}
+
+%\includeonlyframes{current}
+\begin{document}
+
+\frame{\titlepage}
+
+\def\firstcircle{(0,0) circle (2cm)}
+\def\secondcircle{(1.4,1.4) circle (2cm)}
+\def\thirdcircle{(0:2.4) circle (2cm)}
+
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+\section{Recap}
+
+\begin{frame}[fragile]
+  \frametitle{Last week's topics}
+
+  Last lecture, we touched upon...
+
+  \begin{itemize}
+  \item[\faBook]<1-> How to design software that can be
+    \emph{utilized} safely in a concurrent setting.
+  \item[\faBook]<1-> \emph{Visibility} in all its weirdness.
+  \item[\faBook]<1-> The tricky topic of object \emph{sharing}.
+  \item[\faBook]<1-> The role of \emph{invariants}, \emph{immutability} and
+    \emph{encapsulation}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Some lessons so far}
+
+  \begin{block}{\faBook\quad It's all about the mutable state.}
+    All concurrency issues boil down to coordinating access to mutable
+    state. The less mutable state, the easier it is to ensure thread safety.
+  \end{block}
+
+  \vspace{0.2cm}
+
+  \begin{block}<2->{\faBook\quad Immutable objects are thread-safe.}
+    Immutable objects simplify concurrent programming tremendously.
+    They are simpler and safer, and can be shared freely without locking
+    or defensive copying.
+  \end{block}
+
+  \vspace{0.2cm}
+
+  \begin{block}<3->{\faBook\quad Encapsulation simplifies concurrency.}
+    Organizes mutable states, hence organizes the invariants and makes them more
+    manageable.
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Some lessons so far (cont.)}
+
+  \begin{itemize}
+  \item[\faBook]<1-> If a field is not mutable, make it \textbf{final}.
+  \item[\faBook]<1-> Guard each mutable variable with a \textbf{lock}.
+  \item[\faBook]<1-> Guard all variables in an \textbf{invariant} with the
+    \textbf{same} lock.
+  \item[\faBook]<1-> Hold locks for the duration of compound actions.
+  \item[\faBook]<1-> Don’t rely on visibility, obscure knowledge of the memory
+    model or generally clever reasoning instead of synchronizing.
+  \item[\faBook]<1-> Make thread safety a \textbf{central part} of your design
+    process.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{This week's topics}
+
+  This week, we will witness that
+
+  \begin{itemize}
+  \item[\faBook]<1-> Spinlocks!
+  \item[\faBook]<1-> Latches!
+  \item[\faBook]<1-> Concurrent Collections!
+  \end{itemize}
+
+  \begin{itemize}
+  \item[\faUserInjured]<2-> We will also demonstrate all of the above in
+    examples.
+  \end{itemize}
+\end{frame}
+
+\section{Spinlocks}
+
+\begin{frame}[fragile]
+  \frametitle{Why spin?}
+
+  \begin{columns}
+    \begin{column}{0.5\textwidth}
+      \begin{itemize}
+      \item<1->[\faBook] It is a pattern (busy-wait) that a beginner coder could
+        come up with.
+      \item<2->[\faBook] Often not the best choice\dots
+      \item<3->[\faBook] But situationally it makes sense!
+      \end{itemize}
+
+      \vspace{1cm}
+
+      \begin{itemize}
+      \item<4->[\faSearch] Basically the Garen of concurrency.
+      \end{itemize}
+    \end{column}
+    \begin{column}{0.5\textwidth}  %%<--- here
+      \uncover<4->{
+      \begin{center}
+        \includegraphics[height=7cm,keepaspectratio]{../media/garen.jpg}
+      \end{center}}
+    \end{column}
+  \end{columns}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{What are spinlocks}
+
+  \begin{block}{\faLock\quad Spinlock}
+    A type of lock where a thread repeatedly checks if the lock is available.
+  \end{block}
+
+  \begin{itemize}
+  \item[\faBook]<1-> Busy-waits in a loop ("spins") instead of sleeping.
+  \item[\faBook]<1-> Example of a non-blocking synchronization primitive.
+  \item[\faBook]<1-> Used when:
+    \begin{itemize}
+    \item[\faCheck] Critical section is very short.
+    \item[\faCheck] Threads are expected to wait only briefly.
+    \end{itemize}
+  \end{itemize}
+
+  \begin{block}<2->{\faLightbulb \quad Key idea}
+    Avoid the overhead of OS thread context switches.
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Busy-wait}
+
+  
+\end{frame}
+
+\section{Latches}
+
+\section{Concurrent Collections}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-engine: xetex
+%%% TeX-master: t
+%%% End:
