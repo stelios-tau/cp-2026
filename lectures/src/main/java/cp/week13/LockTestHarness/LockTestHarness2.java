@@ -7,12 +7,12 @@ public class LockTestHarness2 {
 
     // Benchmark settings
     private static final List<Integer> numThreadsList = Arrays.asList(1, 2, 4, 8, 16, 32);
-    private static final List<Integer> incrementsPerThreadList = Arrays.asList(20_000_000);
+    private static final List<Integer> incrementsPerThreadList = Arrays.asList(4_000_000);
     private static final int repetitions = 5;
 
     public static void main(String[] args) throws InterruptedException {
-        //System.out.println("Benchmark: SpinLock");
-        //runBenchmark("SpinLock", new SpinLock());
+        System.out.println("Benchmark: SpinLock");
+        runBenchmark("SpinLock", new SpinLock());
 
         System.out.println("\nBenchmark: synchronized");
         runBenchmarkSynchronized();

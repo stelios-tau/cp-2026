@@ -371,6 +371,13 @@ public void doWorkWithSynchronizedLock() {
 % SpinLock   &  8 threads &  4000000 inc/thread & 3058.44 ms \\
 % SpinLock   & 16 threads &  4000000 inc/thread & 11280.23 ms \\
 
+% spinlock without hint
+% SpinLock   &  1 threads &  4000000 inc/thread & 23.79 ms \\
+% SpinLock   &  2 threads &  4000000 inc/thread & 255.91 ms \\
+% SpinLock   &  4 threads &  4000000 inc/thread & 821.17 ms \\
+% SpinLock   &  8 threads &  4000000 inc/thread & 3142.18 ms \\
+% SpinLock   & 16 threads &  4000000 inc/thread & 11278.40 ms \\
+
 % Benchmark: synchronized
 % synchronized &  1 threads &  4000000 inc/thread & 17.45 ms \\
 % synchronized &  2 threads &  4000000 inc/thread & 130.45 ms \\
@@ -384,6 +391,8 @@ public void doWorkWithSynchronizedLock() {
 % SpinLock   &  4 threads &  4000000 inc/thread & 126.49 ms \\
 % SpinLock   &  8 threads &  4000000 inc/thread & 244.12 ms \\
 % SpinLock   & 16 threads &  4000000 inc/thread & 486.06 ms \\
+
+
 
 \begin{frame}[fragile]
   \frametitle{Spinlock vs \texttt{synchronized} (Blocking) vs nothing}
@@ -399,9 +408,10 @@ public void doWorkWithSynchronizedLock() {
       legend style={at={(1.3,1)},anchor=north}
       ]
       \addplot coordinates {(1,23.90) (2,194.69) (4,804.36)};
+      \addplot coordinates {(1,23.79) (2,255.91) (4,821.17)};
       \addplot coordinates {(1,17.45) (2,130.45) (4,210.27)};
       \addplot coordinates {(1,8.28) (2,57.00) (4,126.49)};
-      \legend{SpinLock, synchronized, nothing}
+      \legend{SpinLock, Spinlock (no-hint),synchronized, nothing}
     \end{axis}
   \end{tikzpicture}
   \end{center}
@@ -421,9 +431,10 @@ public void doWorkWithSynchronizedLock() {
       legend style={at={(1.3,1)},anchor=north}
       ]
       \addplot coordinates {(1,23.90) (2,194.69) (4,804.36) (8,3058.44) (16,11280.23)};
+      \addplot coordinates {(1,23.79) (2,255.91) (4,821.17) (8,3142.18) (16,11278.40)};
       \addplot coordinates {(1,17.45) (2,130.45) (4,210.27) (8,351.00) (16,749.40)};
       \addplot coordinates {(1,8.28) (2,57.00) (4,126.49) (8,244.12) (16,486.06)};
-      \legend{SpinLock, synchronized, nothing}
+      \legend{SpinLock, Spinlock (no-hint),synchronized, nothing}
     \end{axis}
   \end{tikzpicture}
   \end{center}
@@ -468,40 +479,55 @@ public void doWorkWithSynchronizedLock() {
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Spinlock vs \texttt{synchronized} (Blocking)}
-  \begin{table}[]
-    \centering
-    \begin{tabular}{l|l|l}
-        \toprule
-      \textbf{}
-      & \textbf{Spinlock}
-      & \textbf{Synchronized / Blocking Lock} \\
-        \midrule
-      \textbf{Behavior}
-      & Active waiting (spins)
-      & Passive waiting (thread blocks)\\
-        \midrule
-      \textbf{CPU Usage}
-      & High during contention
-      & Low (thread sleeps)\\
-        \midrule
-      \textbf{Context switch}
-      & Avoided (keeps spinning)
-      & Incurred (expensive) \\
-        \midrule
-      \textbf{Best for}
-      & Low-contention, short tasks
-      & Longer critical sections \\
-        \bottomrule
-    \end{tabular}
-  \end{table}
-
-  \begin{block}<2->{\faExclamationTriangle \quad Important}
-    Spinlocks waste CPU if contention is high!
+  \frametitle{Spinlocks, the truth}
+    \begin{itemize}
+  \item[\faBook]<1-> Do spinlocks just suck then?!
+  \item[\faBook]<2-> No not really, they are useful in certain cases, and see a lot of use
+    in kernels and RTOS.
+  \item[\faBook]<3-> Even the JVM uses it (see e.g. page 232 in the book)!
+  \end{itemize}
+  \vspace{0.6cm}
+  \begin{block}<4->{\faPuzzlePiece \quad Challege time!}
+    Can someone come up with a multi-threaded/concurrency situation/problem setting
+    where spinlocking, under circumstances, performs consistently and visibly
+    better than \texttt{synchronized}? First three to demonstrate win half-a-point!
   \end{block}
 \end{frame}
 
 \section{Latches (and task delegation)}
+
+\begin{frame}[fragile]
+  \frametitle{The Problem — Coordinating Threads}
+  \begin{block}<1->{\faPuzzlePiece \quad The problem}
+    You launch multiple threads to do some work... But how do you wait for all
+    of them to finish before moving on?
+  \end{block}
+
+  For instance:
+  \begin{itemize}
+  \item[\faBook]<1-> Wait for all chefs to finish prep before serving.
+  \item[\faBook]<1-> Wait for multiple services to initialize before starting the server.
+  \item[\faBook]<1-> Wait for data loading to finish before processing.
+  \item[\faBook]<1-> Wait for other threads to calculate a number, then perform
+    an operation on their results.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Introducing \texttt{CountDownLatch}}
+  \begin{block}<1->{\faLightBulb \quad Key idea}
+    A \texttt{CountDownLatch} lets one or more threads wait until a set of operations are completed.
+  \end{block}
+
+  For instance:
+  \begin{itemize}
+  \item[\faBook]<1-> Wait for all chefs to finish prep before serving.
+  \item[\faBook]<1-> Wait for multiple services to initialize before starting the server.
+  \item[\faBook]<1-> Wait for data loading to finish before processing.
+  \item[\faBook]<1-> Wait for other threads to calculate a number, then perform
+    an operation on their results.
+  \end{itemize}
+\end{frame}
 
 \section{Concurrent Collections}
 
