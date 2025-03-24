@@ -18,16 +18,16 @@ public class SynchronizedMap
 		Map< String, Integer > occurrences = new HashMap<>();
 		
 		List< String > filenames = List.of(
-			"text1.txt",
-			"text2.txt",
-			"text3.txt",
-			"text4.txt",
-			"text5.txt",
-			"text6.txt",
-			"text7.txt",
-			"text8.txt",
-			"text9.txt",
-			"text10.txt"
+			"lectures/text1.txt",
+			"lectures/text2.txt",
+			"lectures/text3.txt",
+			"lectures/text4.txt",
+			"lectures/text5.txt",
+			"lectures/text6.txt",
+			"lectures/text7.txt",
+			"lectures/text8.txt",
+			"lectures/text9.txt",
+			"lectures/text10.txt"
 		);
 		
 		CountDownLatch latch = new CountDownLatch( filenames.size() );

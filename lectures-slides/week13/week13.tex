@@ -663,11 +663,71 @@ latch.await(); // Blocks until count == 0
   \end{center}
 \end{frame}
 
+\begin{frame}[fragile]
+  \frametitle{Summarizing latches}
+
+  \begin{itemize}
+  \item[\faBook]<1-> Great for coarse, one-shot coordination.
+  \item[\faBook]<1-> Very simple, with \texttt{await()} and \texttt{countDown()}.
+  \item[\faBook]<1-> Use it to block until (all or some) other threads signal
+    they’re done.
+    \begin{itemize}
+      \item[\faCheck] One does not need to carry \emph{references} of the
+        threads around the code.
+      \item[\faWindowClose] Can only do this one thing.
+    \end{itemize}
+  \item[\faBook]<2-> For reusability or bidirectional sync, look into
+    \texttt{CyclicBarrier} or \texttt{Phaser}.
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Efficient concurrent programming}
+
+  \begin{itemize}
+  \item[\faUserInjured]<1-> Blocking (and thus blocking locks) greatly hurts
+    performance.
+  \item[\faBook]<1-> Generally, thread-safety primitives incur significant
+    overhead.
+  \item[\faBook]<1-> Thus, performance and thread-safety are competing against
+    each other.
+  \item[\faBook]<1-> It is up to the programmer to find the right balance, via
+    correct design and solid command of the invariants.
+  \end{itemize}
+
+  \vspace{0.4cm}
+  \begin{block}<2->{\faLightbulb \quad Key idea}
+    In order to avoid blocking, one should synchronize as \textbf{little} as
+    \textbf{possible}.
+    Assigning to each thread independent tasks is \textbf{crucial}.
+  \end{block}
+\end{frame}
 
 \section{Concurrent Collections}
 
 \begin{frame}[fragile]
-  \frametitle{Remember delegation?}
+  \frametitle{Delegating thread safety}
+
+  \begin{block}<1->{\faBook \quad Delegation}
+    Using an object's inherent synchronization capabilities to ensure thread-safety.
+  \end{block}
+
+  \vspace{0.4cm}
+  \begin{itemize}
+  \item[\faBook]<2-> Classes such as \texttt{AtomicInteger}, \texttt{AtomicLong},
+    \texttt{AtomicBoolean} offer thread-safe primitive variables.
+  \item[\faBook]<3-> Classes such as \texttt{SynchronizedList} and
+    \texttt{SynchronizedMap} offer thread-safe \emph{collections}.
+  \item[\faBook]<4-> \emph{Concurrent collections} are also another (largely)
+    thread-safe collection of Java \emph{collections}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Synchronized vs Concurrent Collection}
+
+  
 \end{frame}
 
 \end{document}

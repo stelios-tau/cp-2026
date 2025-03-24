@@ -11,7 +11,7 @@ import cp.week13.Words;
 
 public class SpinlockMap2T
 {
-	public static void main(String[] args)
+	public static void main()
 	{
 		// word -> number of times that it appears over all files
 		Map< String, Integer > occurrences = new HashMap<>();

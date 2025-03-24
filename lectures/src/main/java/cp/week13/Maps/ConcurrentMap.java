@@ -12,7 +12,7 @@ import cp.week13.Words;
 
 public class ConcurrentMap
 {
-	public static void main(String[] args)
+	public static void main()
 	{
 		// word -> number of times that it appears over all files
 		Map< String, Integer > occurrences = new ConcurrentHashMap<>();
@@ -45,7 +45,7 @@ public class ConcurrentMap
 			e.printStackTrace();
 		}
 		
-		occurrences.forEach( (word, n) -> System.out.println( word + ": " + n ) );
+		//occurrences.forEach( (word, n) -> System.out.println( word + ": " + n ) );
 	}
 	
 	private static void computeOccurrences( String filename, Map< String, Integer > occurrences )
