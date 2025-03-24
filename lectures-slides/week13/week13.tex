@@ -515,21 +515,160 @@ public void doWorkWithSynchronizedLock() {
 
 \begin{frame}[fragile]
   \frametitle{Introducing \texttt{CountDownLatch}}
-  \begin{block}<1->{\faLightBulb \quad Key idea}
+  \begin{block}<1->{\faLightbulb \quad Key idea}
     A \texttt{CountDownLatch} lets one or more threads wait until a set of operations are completed.
   \end{block}
 
   For instance:
   \begin{itemize}
-  \item[\faBook]<1-> Wait for all chefs to finish prep before serving.
-  \item[\faBook]<1-> Wait for multiple services to initialize before starting the server.
-  \item[\faBook]<1-> Wait for data loading to finish before processing.
-  \item[\faBook]<1-> Wait for other threads to calculate a number, then perform
-    an operation on their results.
+  \item[\faBook]<1-> Threads call \texttt{latch.countDown()} when they’re done.
+  \item[\faBook]<1-> Main thread calls \texttt{latch.await()} to wait.
   \end{itemize}
 \end{frame}
 
+\begin{frame}[fragile]
+  \frametitle{\texttt{CountDownLatch} in the code}
+
+\begin{lstlisting}[language = Java , frame = trBL , firstnumber = last ,
+escapeinside={(*@}{@*)}]
+CountDownLatch latch = new CountDownLatch(NUM); // We expect NUM threads to finish
+[...]
+for (int i = 0; i < NUM; i++) {
+    new Thread(() -> {
+        doWork();
+        latch.countDown(); // Signal task completion
+    }).start();
+}
+[...]
+latch.await(); // Blocks until count == 0
+\end{lstlisting}
+
+  \begin{block}<2->{\faExclamationTriangle \quad Important}
+    Don't forget to call \texttt{latch.CountDown()} when the thread is done!
+  \end{block}
+\end{frame}
+
+% Benchmarks done on my (faster) PC, with 16 cores
+% 134217728 = 2^27
+% 1073741824 = 2^30
+% Benchmark: GlobalCounter
+% Global     &  1 & 134217728 & 142.63 ms \
+% Global     &  1 & 1073741824 & 1091.88 ms \
+% Global     &  2 & 134217728 & 683.49 ms \
+% Global     &  2 & 1073741824 & 5537.15 ms \
+% Global     &  4 & 134217728 & 782.39 ms \
+% Global     &  4 & 1073741824 & 6129.00 ms \
+% Global     &  8 & 134217728 & 485.40 ms \
+% Global     &  8 & 1073741824 & 3899.85 ms \
+% Global     & 16 & 134217728 & 465.10 ms \
+% Global     & 16 & 1073741824 & 3720.81 ms \
+% Global     & 32 & 134217728 & 456.63 ms \
+% Global     & 32 & 1073741824 & 3682.52 ms \
+
+% Benchmark: LocalCounter+Latch
+% Local+Latch &  1 & 134217728 & 1.32 ms \
+% Local+Latch &  1 & 1073741824 & 0.20 ms \
+% Local+Latch &  2 & 134217728 & 0.33 ms \
+% Local+Latch &  2 & 1073741824 & 0.36 ms \
+% Local+Latch &  4 & 134217728 & 0.65 ms \
+% Local+Latch &  4 & 1073741824 & 0.59 ms \
+% Local+Latch &  8 & 134217728 & 1.15 ms \
+% Local+Latch &  8 & 1073741824 & 1.18 ms \
+% Local+Latch & 16 & 134217728 & 2.44 ms \
+% Local+Latch & 16 & 1073741824 & 2.86 ms \
+% Local+Latch & 32 & 134217728 & 5.47 ms \
+% Local+Latch & 32 & 1073741824 & 4.74 ms \
+
+% I think in the 2nd, optimized batch the latch really adds noticeable overhead.
+
+\begin{frame}[fragile]
+  \frametitle{\texttt{synchronized} vs Latch and delegation ($2^{27}$ increments)}
+
+  \begin{center}
+    \begin{tikzpicture}
+      \begin{axis}[
+        % ybar,
+        symbolic x coords={1,2,4,8,16,32},
+        xtick=data,
+        xlabel={Threads},
+        ylabel={Time (ms)},
+        legend style={at={(1.3,1)},anchor=north}
+        ]
+        \addplot coordinates {(1,142.63) (2,683.49) (4,782.39) (8,485.40) (16,465.10) (32,456.63)};
+        \addplot coordinates {(1,1.32) (2,0.33) (4,0.65) (8,1.15) (16,2.44) (32,5.47)};
+        \legend{synchronized, Latch'd}
+      \end{axis}
+    \end{tikzpicture}
+  \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{\texttt{synchronized} vs Latch and delegation ($2^{30}$ increments)}
+
+  \begin{center}
+    \begin{tikzpicture}
+      \begin{axis}[
+        % ybar,
+        symbolic x coords={1,2,4,8,16,32},
+        xtick=data,
+        xlabel={Threads},
+        ylabel={Time (ms)},
+        legend style={at={(1.3,1)},anchor=north}
+        ]
+        \addplot coordinates {(1,1091.88) (2,5537.15) (4,6129.00) (8,3899.85) (16,3720.81) (32,3682.52)};
+        \addplot coordinates {(1,0.20) (2,0.36) (4,0.59) (8,1.18) (16,2.86) (32,4.74)};
+        \legend{synchronized, Latch'd}
+      \end{axis}
+    \end{tikzpicture}
+  \end{center}
+\end{frame}
+
+% Benchmarks done on my (faster) PC, with 16 core
+% Local+Latch &  1 & 137438953472 & 1861.63 ms \
+% Local+Latch &  2 & 137438953472 & 949.02 ms \
+% Local+Latch &  4 & 137438953472 & 479.90 ms \
+% Local+Latch &  8 & 137438953472 & 241.49 ms \
+% Local+Latch & 16 & 137438953472 & 200.02 ms \
+% Local+Latch & 32 & 137438953472 & 138.73 ms \
+% Local+Latch & 64 & 137438953472 & 150.83 ms \
+
+% Local+Latch &  1 & 274877906944 & 3718.28 ms \
+% Local+Latch &  2 & 274877906944 & 1885.63 ms \
+% Local+Latch &  4 & 274877906944 & 1035.00 ms \
+% Local+Latch &  8 & 274877906944 & 486.03 ms \
+% Local+Latch & 16 & 274877906944 & 414.80 ms \
+% Local+Latch & 32 & 274877906944 & 267.12 ms \
+% Local+Latch & 64 & 274877906944 & 304.39 ms \
+
+
+
+\begin{frame}[fragile]
+  \frametitle{Comparing increments (latch'd): $2^{37}$ vs $2^{38}$}
+
+  \begin{center}
+    \begin{tikzpicture}
+      \begin{axis}[
+        ybar,
+        symbolic x coords={1,2,4,8,16,32,64},
+        xtick=data,
+        xlabel={Threads},
+        ylabel={Time (ms)},
+        legend style={at={(1.3,1)},anchor=north}
+        ]
+        \addplot coordinates {(1,1861.63) (2,949.02) (4,479.90) (8,241.49) (16,200.02) (32,138.73) (64,150.83)};
+        \addplot coordinates {(1,3718.28) (2,1885.63) (4,1035.00) (8,486.03) (16,414.80) (32,267.12) (64,304.39)};
+        \legend{$2^{37}$,$2^{38}$}
+      \end{axis}
+    \end{tikzpicture}
+  \end{center}
+\end{frame}
+
+
 \section{Concurrent Collections}
+
+\begin{frame}[fragile]
+  \frametitle{Remember delegation?}
+\end{frame}
 
 \end{document}
 

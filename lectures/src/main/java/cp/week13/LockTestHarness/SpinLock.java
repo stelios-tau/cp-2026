@@ -7,7 +7,7 @@ class SpinLock implements LockStrategy {
 
     public void lock() {
         while (!locked.compareAndSet(false, true)) {
-            //Thread.onSpinWait();
+            Thread.onSpinWait();
         }
     }
 
