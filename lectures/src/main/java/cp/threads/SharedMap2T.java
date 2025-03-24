@@ -20,7 +20,7 @@ public class SharedMap2T
 		
 		Thread t1 = new Thread( () -> {
 			try {
-				Files.lines( Paths.get( "text1.txt" ) )
+				Files.lines( Paths.get( "lectures/text1.txt" ) )
 					.flatMap( s -> Stream.of( s.split( " " ) ) )
 					.forEach( word -> {
 						synchronized( results ) {
@@ -35,7 +35,7 @@ public class SharedMap2T
 		
 		Thread t2 = new Thread( () -> {
 			try {
-				Files.lines( Paths.get( "text2.txt" ) )
+				Files.lines( Paths.get( "lectures/text2.txt" ) )
 					.flatMap( s -> Stream.of( s.split( " " ) ) )
 					.forEach( word -> {
 						synchronized( results ) {
