@@ -1,4 +1,4 @@
-package cp.threads;
+package cp.week13.Maps;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -6,6 +6,8 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import cp.week13.Words;
 
 public class SpinlockMap2T
 {

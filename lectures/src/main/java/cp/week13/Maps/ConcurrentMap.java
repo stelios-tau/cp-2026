@@ -1,31 +1,33 @@
-package cp.threads;
+package cp.week13.Maps;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
-public class SynchronizedMap
+import cp.week13.Words;
+
+public class ConcurrentMap
 {
-	public static void main()
+	public static void main(String[] args)
 	{
 		// word -> number of times that it appears over all files
-		Map< String, Integer > occurrences = new HashMap<>();
+		Map< String, Integer > occurrences = new ConcurrentHashMap<>();
 		
 		List< String > filenames = List.of(
-			"text1.txt",
-			"text2.txt",
-			"text3.txt",
-			"text4.txt",
-			"text5.txt",
-			"text6.txt",
-			"text7.txt",
-			"text8.txt",
-			"text9.txt",
-			"text10.txt"
+			"lectures/text1.txt",
+			"lectures/text2.txt",
+			"lectures/text3.txt",
+			"lectures/text4.txt",
+			"lectures/text5.txt",
+			"lectures/text6.txt",
+			"lectures/text7.txt",
+			"lectures/text8.txt",
+			"lectures/text9.txt",
+			"lectures/text10.txt"
 		);
 		
 		CountDownLatch latch = new CountDownLatch( filenames.size() );
@@ -43,7 +45,7 @@ public class SynchronizedMap
 			e.printStackTrace();
 		}
 		
-//		occurrences.forEach( (word, n) -> System.out.println( word + ": " + n ) );
+		occurrences.forEach( (word, n) -> System.out.println( word + ": " + n ) );
 	}
 	
 	private static void computeOccurrences( String filename, Map< String, Integer > occurrences )
@@ -53,9 +55,7 @@ public class SynchronizedMap
 				.flatMap( Words::extractWords )
 				.map( String::toLowerCase )
 				.forEach( s -> {
-					synchronized( occurrences ) {
-						occurrences.merge( s, 1, Integer::sum );
-					}
+					occurrences.merge( s, 1, Integer::sum );
 				} );
 		} catch( IOException e ) {
 			e.printStackTrace();

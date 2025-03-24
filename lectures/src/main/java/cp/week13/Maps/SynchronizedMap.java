@@ -1,19 +1,21 @@
-package cp.threads;
+package cp.week13.Maps;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 
-public class ConcurrentMap
+import cp.week13.Words;
+
+public class SynchronizedMap
 {
 	public static void main()
 	{
 		// word -> number of times that it appears over all files
-		Map< String, Integer > occurrences = new ConcurrentHashMap<>();
+		Map< String, Integer > occurrences = new HashMap<>();
 		
 		List< String > filenames = List.of(
 			"text1.txt",
@@ -53,7 +55,9 @@ public class ConcurrentMap
 				.flatMap( Words::extractWords )
 				.map( String::toLowerCase )
 				.forEach( s -> {
-					occurrences.merge( s, 1, Integer::sum );
+					synchronized( occurrences ) {
+						occurrences.merge( s, 1, Integer::sum );
+					}
 				} );
 		} catch( IOException e ) {
 			e.printStackTrace();
