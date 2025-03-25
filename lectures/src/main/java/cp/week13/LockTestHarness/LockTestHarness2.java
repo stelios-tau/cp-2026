@@ -6,7 +6,7 @@ public class LockTestHarness2 {
     private static volatile int counter = 0;
 
     // Benchmark settings
-    private static final List<Integer> numThreadsList = Arrays.asList(1, 2, 4, 8, 16, 32);
+    private static final List<Integer> numThreadsList = Arrays.asList(1, 2, 4, 8);
     private static final List<Integer> incrementsPerThreadList = Arrays.asList(4_000_000);
     private static final int repetitions = 5;
 

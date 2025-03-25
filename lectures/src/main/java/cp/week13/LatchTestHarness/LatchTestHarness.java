@@ -3,7 +3,7 @@ import java.util.concurrent.CountDownLatch;
 
 public class LatchTestHarness {
     private static final int NUM_THREADS = 12;
-    private static final long TOTAL_INCREMENTS = 2_000_000_000L;
+    private static final long TOTAL_INCREMENTS = 5_000_000_000L;
     // 10_000_000_000_000L for the optimized case in about 15 seconds on my PC
     // 2_000_000_000L for the unoptimized case in 8 seconds on my PC
     private static long sharedCounter = 0L;

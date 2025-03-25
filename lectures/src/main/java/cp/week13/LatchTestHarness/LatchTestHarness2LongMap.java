@@ -9,8 +9,8 @@ public class LatchTestHarness2LongMap {
     private static long sharedCounter = 0;
     private static final Object lock = new Object();
     private static final List<Integer> threadCounts = Arrays.asList(1, 2, 4, 8, 16, 32, 64);
-    private static final List<Long> totalIncrements = Arrays.asList(137438953472L);
-    private static final int REPS = 5;
+    private static final List<Long> totalIncrements = Arrays.asList(13743895L);
+    private static final int REPS = 1;
 
     public static void main(String[] args) throws InterruptedException {
 
@@ -75,11 +75,11 @@ private static double benchmarkPerThreadMapConcurrent(int numThreads, long total
         for (int threadId = 0; threadId < numThreads; threadId++) {
             final int id = threadId;
             Thread t = new Thread(() -> {
-                long local = 0;
+                map.put(id, 0L);
                 for (long j = 0; j < perThread; j++) {
-                    local++;
+                    long cur = map.get(id);
+                    map.put(id, ++cur); // Each thread sets its own key
                 }
-                map.put(id, local); // Each thread sets its own key
                 latch.countDown();
             });
             t.start();

@@ -1,8 +1,8 @@
 package cp.week13.LockTestHarness;
 
 public class LockTestHarness {
-    private static final int NUM_THREADS = 4;
-    private static final int INCREMENTS_PER_THREAD = 10_000_000;
+    private static final int NUM_THREADS = 1;
+    private static final int INCREMENTS_PER_THREAD = 90_000_000;
     private static int counter = 0;
 
     public static void main(String[] args) throws InterruptedException {
