@@ -250,6 +250,15 @@
 \end{frame}
 
 \begin{frame}[fragile]
+  \begin{center}
+    \begin{figure}
+      \includegraphics[height=7cm,keepaspectratio]{../media/Steve.png}
+      \caption{A perhaps accurate depiction of the earlier phenomenon.}
+    \end{figure}
+  \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
   \frametitle{What are spinlocks}
 
   \begin{block}{\faLock\quad Spinlock}
@@ -727,7 +736,7 @@ latch.await(); // Blocks until count == 0
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{\texttt{synchronizedMap} vs \texttt{ConcurrentHashMap}}
+  \frametitle{\texttt{synchronizedMap()} vs \texttt{ConcurrentHashMap}}
 
   \begin{table}[h]
 \centering
@@ -752,8 +761,36 @@ Implementation & Wrapper around regular \texttt{Map} with \texttt{synchronized}
 & Custom concurrent structure, element-level locks\\
 \hline
 \end{tabularx}
-\caption{Comparison of \texttt{Collections.synchronizedMap} and \texttt{ConcurrentHashMap}}
+\caption{Comparison of \texttt{Collections.synchronizedMap()} and \texttt{ConcurrentHashMap}}
 \end{table}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Code Listings}
+
+  \begin{itemize}
+  \item[\faCode]<1-> LockTestHarness/Spinlock.java: Spinlock implementation
+  \item[\faCode]<1-> LockTestHarness/LockTestHarness.java: Spinlock vs
+    \texttt{synchronized} (single-run)
+  \item[\faCode]<1-> LockTestHarness/LockTestHarness2.java: Spinlock vs
+    \texttt{synchronized} (benchmark)
+  \item[\faCode]<1-> LatchTestHarness/LatchTestHarness.java: Latch (local
+    updates) vs
+    \texttt{synchronized} (single)
+  \item[\faCode]<1-> LatchTestHarness/LatchTestHarness2.java: Latch (local
+    updates) vs
+    \texttt{synchronized} (benchmark)
+  \item[\faCode]<1-> LatchTestHarness/LatchTestHarness2Long.java: Proper
+    benchmarking for latching and local updates using \texttt{long}'s.
+  \item[\faCode]<1-> LatchTestHarness/LatchTestHarness2LongMap.java: Latch
+    (local updates) vs \texttt{ConcurrentHashMap}.
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}{}
+  \centering \huge
+  Thank you!
 \end{frame}
 
 \end{document}
