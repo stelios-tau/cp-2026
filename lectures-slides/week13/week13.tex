@@ -6,6 +6,8 @@
 \usepackage{fontawesome5}
 \usepackage{booktabs} % For better table formatting
 \usepackage{listings}
+\usepackage{tabularx}
+
 
 \lstset{
   tabsize = 4, %% set tab space width
@@ -725,9 +727,33 @@ latch.await(); // Blocks until count == 0
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Synchronized vs Concurrent Collection}
+  \frametitle{\texttt{synchronizedMap} vs \texttt{ConcurrentHashMap}}
 
-  
+  \begin{table}[h]
+\centering
+\begin{tabularx}{\textwidth}{|l|X|X|}
+\hline
+\textbf{Aspect} & \texttt{synchronizedMap} & \texttt{ConcurrentHashMap} \\
+\hline
+Thread safety & Each method synchronized & Fully thread-safe \\
+\hline
+Granularity & One lock for all ops & Per-element (bucket) or lock-free \\
+\hline
+Performance under load & Low: lots of contention & High scalability \\
+\hline
+Compound operations & Manually synchronized & \texttt{putIfAbsent},
+\texttt{compute}, \texttt{merge} are atomic\\
+\hline
+Iteration safety & Must externally synchronize & Safe to iterate \\
+\hline
+Allows \texttt{null} & Keys and values allowed & \textbf{No} Null keys/values  \\
+\hline
+Implementation & Wrapper around regular \texttt{Map} with \texttt{synchronized}
+& Custom concurrent structure, element-level locks\\
+\hline
+\end{tabularx}
+\caption{Comparison of \texttt{Collections.synchronizedMap} and \texttt{ConcurrentHashMap}}
+\end{table}
 \end{frame}
 
 \end{document}

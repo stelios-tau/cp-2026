@@ -2,8 +2,10 @@ package cp.week13.LatchTestHarness;
 import java.util.concurrent.CountDownLatch;
 import java.util.List;
 import java.util.Arrays;
+import java.util.concurrent.ConcurrentHashMap;
 
-public class LatchTestHarness2Long {
+
+public class LatchTestHarness2LongMap {
     private static long sharedCounter = 0;
     private static final Object lock = new Object();
     private static final List<Integer> threadCounts = Arrays.asList(1, 2, 4, 8, 16, 32, 64);
@@ -17,6 +19,14 @@ public class LatchTestHarness2Long {
             for (long total : totalIncrements) {
                 double avg = benchmarkLocalCounterWithLatch(threads, total);
                 System.out.printf("Local+Latch & %2d & %8d & %.2f ms \\%n", threads, total, avg);
+            }
+        }
+
+        System.out.println("\nBenchmark: PerThreadMap+ConcurrentHashMap");
+        for (int threads : threadCounts) {
+            for (long total : totalIncrements) {
+                double avg = benchmarkPerThreadMapConcurrent(threads, total);
+                System.out.printf("PerThreadMap & %2d & %8d & %.2f ms \\%n", threads, total, avg);
             }
         }
     }
@@ -51,5 +61,46 @@ public class LatchTestHarness2Long {
 
         return totalTime / (REPS * 1_000_000.0); // ms
     }
+
+private static double benchmarkPerThreadMapConcurrent(int numThreads, long totalIncrements) throws InterruptedException {
+    long totalTime = 0;
+    long perThread = totalIncrements / numThreads;
+
+    for (int r = 0; r < REPS; r++) {
+        ConcurrentHashMap<Integer, Long> map = new ConcurrentHashMap<>();
+        CountDownLatch latch = new CountDownLatch(numThreads);
+
+        long start = System.nanoTime();
+
+        for (int threadId = 0; threadId < numThreads; threadId++) {
+            final int id = threadId;
+            Thread t = new Thread(() -> {
+                long local = 0;
+                for (long j = 0; j < perThread; j++) {
+                    local++;
+                }
+                map.put(id, local); // Each thread sets its own key
+                latch.countDown();
+            });
+            t.start();
+        }
+
+        latch.await();
+
+        // Aggregate result (single-threaded)
+        long total = 0;
+        for (long val : map.values()) {
+            total += val;
+        }
+        
+        System.out.println(total);
+
+        long end = System.nanoTime();
+        totalTime += (end - start);
+    }
+
+    return totalTime / (REPS * 1_000_000.0); // ms
+}
+
 }
 
