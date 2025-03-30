@@ -2,13 +2,14 @@ package cp.week13.LockTestHarness;
 import java.util.List;
 import java.util.Arrays;
 
-public class LockTestHarness2 {
+public class SyncVSGarenCampaign {
     private static volatile int counter = 0;
 
     // Benchmark settings
     private static final List<Integer> numThreadsList = Arrays.asList(1, 2, 4, 8);
     private static final List<Integer> incrementsPerThreadList = Arrays.asList(4_000_000);
-    private static final int repetitions = 5;
+    private static final int repetitions = 4;
+    private static final int delay = 8;
 
     public static void main(String[] args) throws InterruptedException {
         System.out.println("Benchmark: SpinLock");
@@ -36,6 +37,11 @@ public class LockTestHarness2 {
                             for (int j = 0; j < incrementsPerThread; j++) {
                                 lock.lock();
                                 try {
+                                    if (delay != 0){
+                                        try {
+                                            Thread.sleep(8); // Simulate work time
+                                        } catch (InterruptedException ignored) {};
+                                    }
                                     counter++;
                                 } finally {
                                     lock.unlock();
@@ -75,6 +81,11 @@ public class LockTestHarness2 {
                         threads[i] = new Thread(() -> {
                             for (int j = 0; j < incrementsPerThread; j++) {
                                 synchronized (lock) {
+                                    if (delay != 0){
+                                        try {
+                                            Thread.sleep(8); // Simulate work time
+                                        } catch (InterruptedException ignored) {};
+                                    }
                                     counter++;
                                 }
                             }

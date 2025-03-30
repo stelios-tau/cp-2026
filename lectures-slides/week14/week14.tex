@@ -136,7 +136,7 @@
   \tableofcontents
 \end{frame}
 
-\section{Recap}
+\section{Recap and revisiting last week's benchmarks}
 
 \begin{frame}[fragile]
   \frametitle{Last week's topics}
@@ -167,9 +167,63 @@
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{\texttt{synchronizedMap()} vs \texttt{ConcurrentHashMap}}
+  \frametitle{Another look at the benchmarks}
 
+  \begin{itemize}
+  \item[\faBook]<1-> The benchmarks presented last week were not very thorough.
+  \item[\faBook]<1-> They only covered a situation where each ``task'', each
+    increment, took a very small amount of time to be completed.
+  \item[\faBook]<1-> In addition, the performance of \texttt{ConcurrentHashMap}
+    was not properly tested against \texttt{synchronized} locking.
+  \end{itemize}
 
+  \vspace{0.4cm}
+
+  \begin{block}<2->{\faSearch \quad Question}
+    What if we increase the time each increment takes?
+  \end{block}
+\end{frame}
+
+% Delay of 8, 1024 increments
+% 32 available processors
+% Global     &  1 &     1024 & 8283.97 ms \
+% Global     &  2 &     1024 & 8289.79 ms \
+% Global     &  4 &     1024 & 8297.24 ms \
+% Global     &  8 &     1024 & 8298.86 ms \
+% Global     & 16 &     1024 & 8297.83 ms \
+% Global     & 32 &     1024 & 8298.37 ms \
+% Global     & 64 &     1024 & 8298.27 ms \
+
+% Benchmark: ConcurrentHashMap
+% ConcurrentMap &  1 &     1024 & 8281.60 ms \
+% ConcurrentMap &  2 &     1024 & 4139.22 ms \
+% ConcurrentMap &  4 &     1024 & 2070.61 ms \
+% ConcurrentMap &  8 &     1024 & 1036.66 ms \
+% ConcurrentMap & 16 &     1024 & 521.31 ms \
+% ConcurrentMap & 32 &     1024 & 275.47 ms \
+% ConcurrentMap & 64 &     1024 & 137.65 ms \
+
+\begin{frame}[fragile]
+  \frametitle{\texttt{synchronized} vs \texttt{ConcurrentHashMap}}
+
+  \begin{center}
+    \begin{tikzpicture}
+      \begin{axis}[
+        % ybar,
+        symbolic x coords={1,2,4,8,16,32,64},
+        xtick=data,
+        xlabel={Threads},
+        ylabel={Time (ms)},
+        legend style={at={(1.3,1)},anchor=north}
+        ]
+        \addplot coordinates {(1,8283.97) (2,8289.79) (4,8297.24) (8,8298.86) (16,8297.83) (32,8298.37) (64,8298.27)};
+        \addplot coordinates {(1,8281.60) (2,4139.22) (4,2070.61) (8,1036.66) (16,521.31) (32,275.47) (64,137.65)};
+        % \addplot coordinates {(1,17.45) (2,130.45) (4,210.27) (8,351.00) (16,749.40)};
+        % \addplot coordinates {(1,8.28) (2,57.00) (4,126.49) (8,244.12) (16,486.06)};
+        \legend{\texttt{synchronized}, \texttt{ConcurrentHashMap}}
+      \end{axis}
+    \end{tikzpicture}
+  \end{center}
 \end{frame}
 
 \begin{frame}[fragile]

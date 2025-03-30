@@ -13,7 +13,7 @@ public class SyncVsMapCampaign {
     private static final int REPS = 1;
 
     public static void main(String[] args) throws InterruptedException {
-
+        
         System.out.println("Benchmark: GlobalCounter");
         for (int threads : threadCounts) {
             for (long total : totalIncrements) {
