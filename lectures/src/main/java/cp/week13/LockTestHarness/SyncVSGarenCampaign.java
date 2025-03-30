@@ -6,10 +6,13 @@ public class SyncVSGarenCampaign {
     private static volatile int counter = 0;
 
     // Benchmark settings
+    // private static final List<Integer> numThreadsList = Arrays.asList(1, 2, 4, 8);
+    // private static final List<Integer> incrementsPerThreadList = Arrays.asList(4_000_000);
     private static final List<Integer> numThreadsList = Arrays.asList(1, 2, 4, 8);
-    private static final List<Integer> incrementsPerThreadList = Arrays.asList(4_000_000);
-    private static final int repetitions = 4;
-    private static final int delay = 8;
+    private static final List<Integer> incrementsPerThreadList = Arrays.asList(256);
+    private static final int repetitions = 2;
+    private static final int innerdelay = 0;
+    private static final int outdelay = 24;
 
     public static void main(String[] args) throws InterruptedException {
         System.out.println("Benchmark: SpinLock");
@@ -18,8 +21,8 @@ public class SyncVSGarenCampaign {
         System.out.println("\nBenchmark: synchronized");
         runBenchmarkSynchronized();
 
-        System.out.println("\nBenchmark: Nothing");
-        runBenchmark("SpinLock", new Nothing());
+        //System.out.println("\nBenchmark: Nothing");
+        //runBenchmark("SpinLock", new Nothing());
     }
 
     private static void runBenchmark(String label, LockStrategy lock) throws InterruptedException {
@@ -35,11 +38,14 @@ public class SyncVSGarenCampaign {
                     for (int i = 0; i < numThreads; i++) {
                         threads[i] = new Thread(() -> {
                             for (int j = 0; j < incrementsPerThread; j++) {
+                                try {
+                                    Thread.sleep((long) (Math.random() * outdelay)); // Random
+                                } catch (InterruptedException ignored) {};
                                 lock.lock();
                                 try {
-                                    if (delay != 0){
+                                    if (innerdelay != 0){
                                         try {
-                                            Thread.sleep(8); // Simulate work time
+                                            Thread.sleep(innerdelay); // Simulate work time
                                         } catch (InterruptedException ignored) {};
                                     }
                                     counter++;
@@ -80,10 +86,13 @@ public class SyncVSGarenCampaign {
                     for (int i = 0; i < numThreads; i++) {
                         threads[i] = new Thread(() -> {
                             for (int j = 0; j < incrementsPerThread; j++) {
+                                try {
+                                    Thread.sleep((long) (Math.random() * outdelay));; // Random Delay
+                                } catch (InterruptedException ignored) {};
                                 synchronized (lock) {
-                                    if (delay != 0){
+                                    if (innerdelay != 0){
                                         try {
-                                            Thread.sleep(8); // Simulate work time
+                                            Thread.sleep(innerdelay); // Simulate work time
                                         } catch (InterruptedException ignored) {};
                                     }
                                     counter++;
