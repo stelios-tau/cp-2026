@@ -1,0 +1,246 @@
+
+\PassOptionsToPackage{colorlinks,linkcolor={blue},citecolor={blue},urlcolor={blue},breaklinks=true,final}{hyperref}
+\PassOptionsToPackage{dvipsnames}{xcolor}
+\documentclass[xcolor={dvipsnames,svgnames},aspectratio=169]{beamer}
+
+\usepackage{fontawesome5}
+\usepackage{booktabs} % For better table formatting
+\usepackage{listings}
+\usepackage{tabularx}
+
+
+\lstset{
+  tabsize = 4, %% set tab space width
+  showstringspaces = false, %% prevent space marking in strings, string is defined as the text that is generally printed directly to the console
+  numbers = left, %% display line numbers on the left
+  commentstyle = \color{purple!60}, %% set comment color
+  keywordstyle = \color{blue}, %% set keyword color
+  stringstyle = \color{red}, %% set string color
+  rulecolor = \color{black}, %% set frame color to avoid being affected by text color
+  basicstyle = \small \ttfamily , %% set listing font and size
+  breaklines = true, %% enable line breaking
+  numberstyle = \tiny,
+}
+
+\title{Concurrent Programming}
+\subtitle{Week 14 (Lecture 6) : \textbf{Queues, tasks and executors}}
+\author{Stelios Tsampas}
+\institute{
+  \faEnvelope \; stelios@imada.sdu.dk
+  \qquad
+  \faGlobe \;
+  \href{https://www.steliostsampas.com}{https://www.steliostsampas.com}
+  \\\\\
+  \faGithub \; stelios-tau/cp-2025
+  \qquad\;\;
+    \faDiscord \; cp-2025
+}
+\date{\today}
+
+\titlegraphic{\includegraphics[height=0.6cm,keepaspectratio]{../media/sdu-black.eps}}
+
+\usetheme[block=fill]{metropolis}
+
+
+%\usepackage{pres-common}
+\usepackage{textpos}
+\usepackage{centernot}
+
+% \newcommand{\Goesv}[3]{\ensuremath{#1 \xRightarrow{~#3~} #2}}
+% \newcommand{\goesv}[3]{\ensuremath{#1 \xrightarrow{~#3~} #2}}
+
+% \usepackage{etex}
+% \usepackage{semantic}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{tikz}
+\usepackage{hyperref}
+
+\usetikzlibrary{arrows,shapes,matrix}
+\usetikzlibrary{backgrounds}
+\usetikzlibrary{positioning}
+\usetikzlibrary{automata}
+\usetikzlibrary{mindmap}
+\usetikzlibrary{shapes.callouts}
+\usetikzlibrary{decorations.text}
+\usetikzlibrary{tikzmark}
+\usetikzlibrary{calc}
+\usetikzlibrary{overlay-beamer-styles}
+\usetikzlibrary{shapes.geometric}
+\usepackage{pgfplots}
+
+
+\tikzset{onslide/.code args={<#1>#2}{%
+    \only<#1>{\pgfkeysalso{#2}} % \pgfkeysalso doesn't change the path
+  }}
+
+\setbeamercolor{mygray}{bg=Gray!20}
+
+\tikzset{temporal/.code args={<#1>#2#3#4}{%
+    \temporal<#1>{\pgfkeysalso{#2}}{\pgfkeysalso{#3}}{\pgfkeysalso{#4}} % \pgfkeysalso doesn't change the path
+  }}
+
+\tikzstyle{highlight}=[fill=green!50]
+\tikzstyle{hgreen}=[fill=green!20]
+\tikzstyle{hred}=[fill=red!50]
+\tikzstyle{hblue}=[fill=blue!50]
+\tikzstyle{hgray}=[fill=gray!50]
+
+\addtobeamertemplate{frametitle}{}{%
+\begin{textblock*}{100mm}(\textwidth-2cm,-0.86cm)
+\includegraphics[height=0.6cm,keepaspectratio]{../media/sdu-white.eps}
+\end{textblock*}}
+
+
+%\usepackage{tikz-cd}
+% \usepackage{wasysym}
+% \usepackage{color}
+% \usepackage[matrix,arrow]{xy}
+% \xyoption{all}
+% \SelectTips{cm}{}
+% % \usepackage{cite}
+% \usepackage{amsthm}
+% \usepackage{amsmath}
+% \usepackage{bbold}
+% % \usepackage[bbgreekl]{mathbbol}
+% \usepackage{amssymb}
+% \usepackage{pifont}
+% \usepackage{mathtools}
+% \usepackage{amsbsy}
+% % \usepackage{paralist}
+% \usepackage{shadethm}
+% % \usepackage{fancyhdr}
+% \usepackage{stmaryrd}
+% \usepackage{wasysym}
+% \usepackage{graphicx}
+% \usepackage{tabularx}
+% \usepackage{dsfont}
+% \usepackage{ulem}
+
+
+
+
+%\bibliography{mainBiblio}
+
+%\includeonlyframes{current}
+\begin{document}
+
+\frame{\titlepage}
+
+\def\firstcircle{(0,0) circle (2cm)}
+\def\secondcircle{(1.4,1.4) circle (2cm)}
+\def\thirdcircle{(0:2.4) circle (2cm)}
+
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+\section{Recap}
+
+\begin{frame}[fragile]
+  \frametitle{Last week's topics}
+
+  Last lecture, we touched upon...
+
+  \begin{itemize}
+  \item[\faBook]<1-> Spinlock, or locking via busy-waiting, and noted how slow
+    spinlocks are on the Java level.
+  \item[\faBook]<1-> Using \texttt{CountDownLatch}'s to elegantly manage and
+    bookkeep thread termination.
+    \begin{itemize}
+    \item[\faBook]<1-> In the process, we briefly broached the subject of task
+      delegation.
+    \end{itemize}
+  \item[\faBook]<1-> Using Java's synchronized collections to simplify
+    concurrency.
+  \item[\faBook]<1-> Discussed various matters of performance and efficiency.
+  \end{itemize}
+
+  \vspace{0.4cm}
+
+  \begin{block}<2->{\faLightbulb \quad Key takeaway}
+    To maintain optimal performance, one should i) \textbf{minimize blocking code}
+    (achieved often by proper \emph{task delegation}) and ii) use the most
+    \textbf{efficient data structures} for concurrency.
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{\texttt{synchronizedMap()} vs \texttt{ConcurrentHashMap}}
+
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{This week's topics}
+
+  This week, we will look at...
+
+  \begin{itemize}
+  \item[\faBook]<1-> The \emph{producer-consumer} pattern.
+  \item[\faBook]<1-> \texttt{Notify}-ing and \texttt{Wait}-ing.
+  \item[\faBook]<1-> Task management with \texttt{BlockingQueue}'s.
+  \item[\faBook]<1-> Task management with \texttt{Executor}'s.
+  \end{itemize}
+
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+  \frametitle{Busy-wait}
+
+\begin{lstlisting}[language = Java , frame = trBL , firstnumber = last ,
+escapeinside={(*@}{@*)}]
+while ((something) == 0) {
+        /* do nothing - just keep checking over and over */
+    }
+
+doSomething();
+\end{lstlisting}
+
+  \vspace{0.2cm}
+  \begin{block}<1->{\faLightbulb \quad Key idea}
+    Wait -- and keep checking -- until a condition is met.
+  \end{block}
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+  \frametitle{Code Listings}
+
+  \begin{itemize}
+  \item[\faCode]<1-> LockTestHarness/Spinlock.java: Spinlock implementation
+  \item[\faCode]<1-> LockTestHarness/LockTestHarness.java: Spinlock vs
+    \texttt{synchronized} (single-run)
+  \item[\faCode]<1-> LockTestHarness/LockTestHarness2.java: Spinlock vs
+    \texttt{synchronized} (benchmark)
+  \item[\faCode]<1-> LatchTestHarness/LatchTestHarness.java: Latch (local
+    updates) vs
+    \texttt{synchronized} (single)
+  \item[\faCode]<1-> LatchTestHarness/LatchTestHarness2.java: Latch (local
+    updates) vs
+    \texttt{synchronized} (benchmark)
+  \item[\faCode]<1-> LatchTestHarness/LatchTestHarness2Long.java: Proper
+    benchmarking for latching and local updates using \texttt{long}'s.
+  \item[\faCode]<1-> LatchTestHarness/LatchTestHarness2LongMap.java: Latch
+    (local updates) vs \texttt{ConcurrentHashMap}.
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}{}
+  \centering \huge
+  Thank you!
+\end{frame}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-engine: xetex
+%%% TeX-master: t
+%%% End:

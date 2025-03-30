@@ -1,7 +1,7 @@
 package cp.week13.LatchTestHarness;
 import java.util.concurrent.CountDownLatch;
 
-public class LatchTestHarness {
+public class GlobalVSLocal {
     private static final int NUM_THREADS = 12;
     private static final long TOTAL_INCREMENTS = 5_000_000_000L;
     // 10_000_000_000_000L for the optimized case in about 15 seconds on my PC

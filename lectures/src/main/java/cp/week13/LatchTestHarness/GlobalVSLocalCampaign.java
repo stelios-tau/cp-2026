@@ -3,7 +3,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.List;
 import java.util.Arrays;
 
-public class LatchTestHarness2 {
+public class GlobalVSLocalCampaign {
     private static int sharedCounter = 0;
     private static final Object lock = new Object();
     private static final List<Integer> threadCounts = Arrays.asList(1, 2, 4, 8, 16, 32);
