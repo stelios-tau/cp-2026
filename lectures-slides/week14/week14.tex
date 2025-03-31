@@ -349,8 +349,9 @@
   \begin{itemize}
   \item[\faBook]<1-> Presence of a data structure representing a to-do list.
     \begin{itemize}
-    \item[\faBook]<1-> Producers identify work and creates \emph{tasks}.
-    \item[\faBook]<1-> Consumers pick up and complete the tasks.
+    \item[\faBook]<1-> Producers identify work and create \emph{tasks} on the list.
+    \item[\faBook]<1-> Consumers pick up (i.e. remove) tasks from the list and
+      complete them.
     \end{itemize}
   \item[\faBook]<1-> Producers and consumers work independently.
   \end{itemize}
@@ -363,27 +364,83 @@
 \begin{frame}[fragile]
   \frametitle{Examples of consumer-producer patterns}
 
-  \begin{itemize}
-  \item[\faCookie]<1-> The kitchen has several such examples.
-    \begin{itemize}
-    \item[\faBook]<1-> 
-    \item[\faBook]<1-> 
-    \end{itemize}
-  \item[\faBook]<1-> Producers and consumers work independently.
-  \end{itemize}
-
   \begin{block}<1->{\faCookie \quad Kitchen}
-    Several examples:
     \begin{itemize}
-    \item[\faBook] Waiter brings orders, the kitchen completes orders.
+    \item[\faBook] Waiter places orders on the board, the kitchen completes
+      orders.
+    \item[\faBook] Chefs put dishes on the counters, waiters must serve.
     \item[\faBook] Chefs produce tasks for each dish that the cooks must
       complete.
+    \item[\faBook] Dish cleaning etc.
     \end{itemize}
   \end{block}
-
-  \begin{block}<1->{\faSearch \quad Factory}
+  \vspace{0.4cm}
+  \begin{block}<2->{\faSearch \quad Factory}
     A certain line manufactures parts and consumers assemble the parts together.
   \end{block}
+    \vspace{0.4cm}
+  \begin{block}<3->{\faPrint \quad Printing}
+    Users put printing jobs to the queue, printer picks jobs up and prints.
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{The pattern}
+
+  \begin{table}[h]
+    \centering
+    \begin{tabularx}{\textwidth}{|l|X|}
+      \hline
+      \textbf{Role} & \textbf{Responsibility} \\
+      \hline
+      Producer & Generate data or tasks \\
+      \hline
+      Consumer & Process or act on them \\
+      \hline
+      Buffer & Temporarily stores work \\
+      \hline
+      Coordination & Ensures safe access and timing \\
+      \hline
+    \end{tabularx}
+  \end{table}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{\faExclamationTriangle \quad Pitfalls}
+
+  \begin{block}<1->{\faExclamationTriangle \quad No coordination}
+    \begin{itemize}
+    \item[\faUserInjured] Producers overwrite each other's items.
+    \item[\faUserInjured] Consumers read nothing (or invalid data).
+    \item[\faUserInjured] Threads spin or block forever (deadlock).
+    \item[\faUserInjured] Shared buffer becomes corrupted.
+    \end{itemize}
+  \end{block}
+  \vspace{0.4cm}
+  \begin{block}<2->{\faBriefcaseMedical \quad Solution}
+    We need a way to synchronize access to the buffer!
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{\faBriefcaseMedical \quad Solutions}
+
+    \begin{table}[h]
+    \centering
+    \begin{tabularx}{\textwidth}{|l|X|}
+      \hline
+      \textbf{Approach} & \textbf{Tool} \\
+      \hline
+      Manual coordination	& \texttt{wait()}, \texttt{notify()} \\
+      \hline
+      Thread-safe buffer & \texttt{BlockingQueue} \\
+      \hline
+      Task abstraction & \texttt{ExecutorService}, queues \\
+      \hline
+      Fine-grained control & Semaphores, locks \\
+      \hline
+    \end{tabularx}
+  \end{table}
 \end{frame}
 
 \begin{frame}[fragile]
