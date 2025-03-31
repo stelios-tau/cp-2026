@@ -341,7 +341,7 @@
 \begin{frame}[fragile]
   \frametitle{The producer-consumer pattern}
 
-  \begin{block}<2->{\faLightbulb \quad Key idea}
+  \begin{block}<1->{\faLightbulb \quad Key idea}
     The \textbf{separation} of \emph{work to be done} from the \emph{execution}
     of the \emph{work}.
   \end{block}
@@ -354,6 +354,36 @@
     \end{itemize}
   \item[\faBook]<1-> Producers and consumers work independently.
   \end{itemize}
+
+    \begin{block}<1->{\faPuzzlePiece \quad Key challenge}
+      How do we pass work from producers to consumers safely and efficiently?
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Examples of consumer-producer patterns}
+
+  \begin{itemize}
+  \item[\faCookie]<1-> The kitchen has several such examples.
+    \begin{itemize}
+    \item[\faBook]<1-> 
+    \item[\faBook]<1-> 
+    \end{itemize}
+  \item[\faBook]<1-> Producers and consumers work independently.
+  \end{itemize}
+
+  \begin{block}<1->{\faCookie \quad Kitchen}
+    Several examples:
+    \begin{itemize}
+    \item[\faBook] Waiter brings orders, the kitchen completes orders.
+    \item[\faBook] Chefs produce tasks for each dish that the cooks must
+      complete.
+    \end{itemize}
+  \end{block}
+
+  \begin{block}<1->{\faSearch \quad Factory}
+    A certain line manufactures parts and consumers assemble the parts together.
+  \end{block}
 \end{frame}
 
 \begin{frame}[fragile]

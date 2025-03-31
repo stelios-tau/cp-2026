@@ -4,7 +4,7 @@ package cp.week14;
  *
  * @author Fabrizio Montesi <fmontesi@imada.sdu.dk>
  */
-public class ThreadsExercise11
+public class ThreadsExercise12
 {
 	/*
 	* Modify the code in Threads/WalkBlockingDeque according to the following:
