@@ -435,9 +435,7 @@
       \hline
       Thread-safe buffer & \texttt{BlockingQueue}, \texttt{PriorityBlockingQueue} \\
       \hline
-      Task abstraction & \texttt{ExecutorService}, queues \\
-      \hline
-      Fine-grained control & Semaphores, locks \\
+      Task abstraction & \texttt{ExecutorService} (they use queues internally) \\
       \hline
     \end{tabularx}
   \end{table}
@@ -593,6 +591,27 @@ System.out.println(next.name);
   \end{block}
 \end{frame}
 
+\begin{frame}[fragile]
+  \frametitle{Using \texttt{BlockingDeque}}
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
+frame = trBL , firstnumber = last , escapeinside={(*@}{@*)}]
+Deque<String> deque = new ArrayDeque<>();
+
+// Add to front and back
+deque.addFirst("🥦 Broccoli");
+deque.addLast("🍅 Tomato");
+
+// Remove from front and back
+String first = deque.removeFirst(); // 🥦
+String last  = deque.removeLast();  // 🍅
+\end{lstlisting}
+  \begin{block}<2->{\faLightbulb \quad Important}
+    Methods for both queue-FIFO (\texttt{addLast} and \texttt{removeFirst}) and
+    stack-LIFO (\texttt{push} and \texttt{pop}).
+  \end{block}
+
+\end{frame}
+
 \section{Executors}
 
 \begin{frame}[fragile]
@@ -745,7 +764,10 @@ if (!pool.isTerminated()) {
       \hline
       \texttt{BlockingQ} & Yes & Built-in & FIFO & Producer-consumer \\
       \hline
-      \texttt{PriorityQ} & Yes & Built-in & Priority & Scheduling and ordered tasks \\
+      \texttt{PriorityQ} & Yes & Built-in & Priority & Scheduling and ordered
+                                                       tasks \\
+      \hline
+      \texttt{BlockingDeque} & Yes & Built-in & LIFO, FIFO& Producer-consumer \\
       \hline
       \texttt{ExecutorService} & Yes & Built-in & Depends & Modern thread management \\
       \hline
@@ -764,6 +786,10 @@ if (!pool.isTerminated()) {
     aforementioned buggy demo using \texttt{ArrayBlockingQueue}.
   \item[\faCode]<1-> BlockingQueues/BlockingQueueKitchen.java : A kitchen
     running using \texttt{LinkedBlockingQueue}.
+  \item[\faCode]<1-> BlockingQueues/WalkBlockingDeque.java : Directory
+    walking using \texttt{BlockingDeque}.
+  \item[\faCode]<1-> Executors/WalkExecutor.java : Directory
+    walking using \texttt{BlockingDeque}.
   \end{itemize}
 
 \end{frame}
