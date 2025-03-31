@@ -8,11 +8,11 @@ public class SyncVSGarenCampaign {
     // Benchmark settings
     // private static final List<Integer> numThreadsList = Arrays.asList(1, 2, 4, 8);
     // private static final List<Integer> incrementsPerThreadList = Arrays.asList(4_000_000);
-    private static final List<Integer> numThreadsList = Arrays.asList(1, 2, 4, 8);
-    private static final List<Integer> incrementsPerThreadList = Arrays.asList(256);
-    private static final int repetitions = 2;
+    private static final List<Integer> numThreadsList = Arrays.asList(2);
+    private static final List<Integer> incrementsPerThreadList = Arrays.asList(512);
+    private static final int repetitions = 1;
     private static final int innerdelay = 0;
-    private static final int outdelay = 24;
+    private static final int outdelay = 128;
 
     public static void main(String[] args) throws InterruptedException {
         System.out.println("Benchmark: SpinLock");

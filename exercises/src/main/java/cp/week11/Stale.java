@@ -1,4 +1,4 @@
-package cp.Week11.Visibility;
+package cp.week11;
 
 /*
  * This is the stale data example from the lecture. You have the

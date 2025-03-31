@@ -1,13 +1,14 @@
-package cp.week15;
+package cp.week14;
 
 /**
  *
  * @author Fabrizio Montesi <fmontesi@imada.sdu.dk>
  */
-public class ThreadsExercise12
+public class ThreadsExercise11
 {
 	/*
-	Modify Threads/NotifyWait such that it has a (new) third thread printing on screen,
-	and such that the third thread waits for Thread t1 to be finished printing on screen before doing anything.
+	* Modify the code in Threads/WalkBlockingDeque according to the following:
+	* 1. Modify it such that only files ending with a ".txt" suffix are put in the tasks deque.
+	* 2. Use PriorityBlockingQueue instead of BlockingQueue, making sure to prioritize files with the least size.
 	*/
 }
