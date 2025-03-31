@@ -146,7 +146,7 @@
   \begin{itemize}
   \item[\faBook]<1-> Spinlock, or locking via busy-waiting, and noted how slow
     spinlocks are on the Java level.
-  \item[\faBook]<1-> Using \texttt{CountDownLatch}'s to elegantly manage and
+  \item[\faBook]<1-> Using \texttt{CountDownLatch} to elegantly manage and
     bookkeep thread termination.
     \begin{itemize}
     \item[\faBook]<1-> In the process, we briefly broached the subject of task
@@ -368,7 +368,7 @@
     \begin{itemize}
     \item[\faBook] Waiter places orders on the board, the kitchen completes
       orders.
-    \item[\faBook] Chefs put dishes on the counters, waiters must serve.
+    \item[\faBook] Chefs put dishes on the counters, waiters must serve it.
     \item[\faBook] Chefs produce tasks for each dish that the cooks must
       complete.
     \item[\faBook] Dish cleaning etc.
@@ -449,16 +449,16 @@
   \frametitle{Low-Level Thread Coordination}
 
   \begin{block}<1->{\faPuzzlePiece \quad Problem statement}
-    Sometimes, threads need to wait for a condition to become true — and they
+    Sometimes, threads need to wait for a condition to become true --- and they
     need to do so without spinning or wasting CPU.
   \end{block}
   \vspace{0.4cm}
   \faBook\quad Java provides low-level methods for this:
   \begin{itemize}
-  \item[\faBook] \texttt{wait()} — pause and release the intrinsic lock (yes,
+  \item[\faBook] \texttt{wait()} --- pause and release the intrinsic lock (yes,
     all of the these methods need to be called from a protected context).
-  \item[\faBook] \texttt{notify()} — wake up one waiting thread.
-  \item[\faBook] \texttt{notifyAll()} — wake up all waiting threads.
+  \item[\faBook] \texttt{notify()} --- wake up one waiting thread.
+  \item[\faBook] \texttt{notifyAll()} --- wake up all waiting threads.
   \end{itemize}
 \end{frame}
 
@@ -507,10 +507,41 @@ class SharedBuffer {
   \end{block}
 \end{frame}
 
-\section{Blocking queues}
+\begin{frame}[fragile]
+  \frametitle{Using \texttt{wait} and \texttt{notify}}
+  \begin{block}<1->{\faBook \quad Takeaway}
+    The real danger isn’t just deadlocks --- it’s that bugs like this might not
+    show up at all unless your timing is just wrong enough. That’s why we like
+    high-level tools like \texttt{BlockingQueue} --- they handle these subtle
+    races for us.
+  \end{block}
+  \vspace{0.4cm}
+  \begin{block}<1->{\faBook \quad Takeaway}
+    I recommend using \texttt{wait} and \texttt{notify} only when you need this
+    fine-grained control over your threads. It should not be your first option
+    for the producer-consumer pattern.
+  \end{block}
+
+\end{frame}
+
+\section{\texttt{BlockingQueue}}
 
 \begin{frame}[fragile]
-  \frametitle{Using queues}
+  \frametitle{\texttt{BlockingQueue}s for clean task buffers}
+
+  \begin{itemize}
+  \item[\faBook] Queues are list-like collections that can hold elements.
+  \item[\faBook] \texttt{BlockingQueue}s are thread-safe for producers and
+    consumers.
+  \item[\faBook] Methods \texttt{put} (\textbf{blocks} if full) and
+    \texttt{take} (\textbf{blocks} if empty) to consume and produce
+    tasks.
+  \item[\faBook]  Clean and robust pattern for handoff.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Using \texttt{BlockingQueue}}
 \begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
 frame = trBL , firstnumber = last , escapeinside={(*@}{@*)}]
 BlockingQueue<String> queue = new LinkedBlockingQueue<>();
@@ -522,16 +553,16 @@ queue.put("Chop tomatoes");
 String task = queue.take();
 System.out.println("Working on: " + task);
 \end{lstlisting}
-  \begin{block}<2->{\faLightbulb \quad Important}
-    \texttt{LinkedBlockingQueue} and \texttt{ArrayBlockingQueue} is FIFO (First
-    In - First Out).
-  \end{block}
-  \vspace{0.2cm}
   \begin{block}<3->{\faLightbulb \quad Important}
-    Methods \texttt{put} and \texttt{take}. \texttt{add} and \texttt{remove}
-    don't block.
+    \begin{itemize}
+    \item[\faBook] \texttt{LinkedBlockingQueue} and \texttt{ArrayBlockingQueue}
+      is FIFO (First In - First Out).
+    \item[\faBook] Methods \texttt{put} and \texttt{take} block. \texttt{add}
+      and \texttt{remove} don't block.
+    \item[\faBook] You can also set its max capacity (or use \texttt{ArrayBlockingQueue});
+    \end{itemize}
   \end{block}
-  \uncover<4->{
+  \uncover<2->{
     \begin{tikzpicture}[overlay, remember picture]
       \node[xshift=10.4cm,yshift=5cm,starburst,starburst points=24,
       align=center,fill=green!50, opacity=1,draw=pink!50, line width=2pt]
@@ -540,46 +571,199 @@ System.out.println("Working on: " + task);
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Bounded queues}
+  \frametitle{Using \texttt{BlockingQueue} (with priority)}
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
+frame = trBL , firstnumber = last , escapeinside={(*@}{@*)}]
+BlockingQueue<Task> queue = new PriorityBlockingQueue<>();
 
-  \begin{block}<1->{\faExclamationTriangle \quad No coordination}
-    \begin{itemize}
-    \item[\faUserInjured] Producers overwrite each other's items.
-    \item[\faUserInjured] Consumers read nothing (or invalid data).
-    \item[\faUserInjured] Threads spin or block forever (deadlock).
-    \item[\faUserInjured] Shared buffer becomes corrupted.
-    \end{itemize}
+queue.put(new Task("Boil water", 3));
+queue.put(new Task("Chop onion", 1));
+queue.put(new Task("Plate dish", 5));
+
+Task next = queue.take(); // Always highest priority
+System.out.println(next.name);
+\end{lstlisting}
+  \begin{block}<2->{\faLightbulb \quad Important}
+    \texttt{PriorityBlockingQueue} is \textbf{not} FIFO -- tasks sorted by
+    natural or custom priority.
   \end{block}
-  \vspace{0.4cm}
-  \begin{block}<2->{\faLightbulb \quad Key idea}
-    Bounded queues are a powerful resource management tool for building
-    reliable applications: they make your program more robust to overload
-    by throttling activities that threaten to produce more work than can be
-    handled.
+  \vspace{0.2cm}
+  \begin{block}<3->{\faLightbulb \quad Important}
+    More control over the order that tasks are going to be executed.
   \end{block}
 \end{frame}
 
 \section{Executors}
 
 \begin{frame}[fragile]
+  \frametitle{The problem with manual thread management}
+
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
+frame = trBL , firstnumber = last , escapeinside={(*@}{@*)}]
+Thread t = new Thread(() -> doWork());
+t.start();
+\end{lstlisting}
+
+  \begin{itemize}
+  \item[\faBook] Threads are expensive to create.
+  \item[\faBook] Little control over how many are running.
+  \item[\faBook] No way to reuse them.
+  \item[\faBook] No easy task scheduling or result tracking
+  \end{itemize}
+
+  \begin{block}<2->{\faLightbulb \quad Solution}
+    Use an \texttt{Executor}!
+  \end{block}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{What is an Executor?}
+
+  An Executor is a high-level abstraction for managing and running tasks. You
+  \textbf{submit tasks} and let the Executor handle \textbf{thread management}.
+
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
+frame = trBL , firstnumber = last , escapeinside={(*@}{@*)}]
+ExecutorService pool = Executors.newFixedThreadPool(4);
+
+pool.submit(() -> {
+    System.out.println("Doing some work...");
+});
+\end{lstlisting}
+
+  \begin{block}<2->{\faLightbulb \quad Key takeaway}
+    Cleaner, safer, and more scalable than raw \texttt{Thread}.
+  \end{block}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Thread pools}
+
+  The Executor framework manages threads via \textbf{thread pools}. Thread pools
+  are structures that store \texttt{Runnable} objects.
+
+  \begin{table}[]
+    \centering
+    \begin{tabular}{l|l|}
+      \toprule
+      \textbf{Factory Method}
+      & \textbf{Behavior}
+        \\
+      \midrule
+      \texttt{newFixedThreadPool(n)}
+      & Fixed number of threads, uses \texttt{LinkedBlockingQueue}\\
+      \midrule
+      \texttt{newCachedThreadPool()}
+      & Creates and reuses threads (uses \texttt{SynchronousQueue})\\
+      \midrule
+      \texttt{newSingleThreadExecutor()}
+      & One thread, FIFO tasks\\
+      \midrule
+      \texttt{newScheduledThreadPool(n)}
+      & Supports delayed/repeating tasks\\
+      \bottomrule
+    \end{tabular}
+  \end{table}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Submitting tasks}
+
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
+frame = trBL , firstnumber = last , escapeinside={(*@}{@*)}]
+ExecutorService pool = Executors.newFixedThreadPool(4);
+
+// Fire-and-forget
+pool.submit(() -> doSomething());
+
+// Track result with Future
+Future<Integer> result = pool.submit(() -> computeAnswer());
+\end{lstlisting}
+
+  \begin{block}<2->{\faLightbulb \quad Note}
+    Tasks can be \texttt{Runnable(void)} or \texttt{Callable<T>} (with result)
+  \end{block}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Cleaning up}
+
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
+frame = trBL , firstnumber = last , escapeinside={(*@}{@*)}]
+pool.shutdown();           // Initiates graceful shutdown
+pool.awaitTermination(5, TimeUnit.SECONDS);
+
+if (!pool.isTerminated()) {
+    pool.shutdownNow();    // Force shutdown
+}
+\end{lstlisting}
+
+  \begin{block}<2->{\faLightbulb \quad Important}
+    Always clean up your thread pool.
+  \end{block}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Executor recap}
+
+  \begin{table}[h]
+    \centering
+    \begin{tabularx}{\textwidth}{|l|X|X|}
+      \hline
+      \textbf{Aspect} & Manual Threads & \texttt{ExecutorService} \\
+      \hline
+      Thread reuse & One thread per task & Reuses thread pool \\
+      \hline
+      Task submission & \texttt{new Thread()} & \texttt{submit()}, \texttt{invokeAll()} \\
+      \hline
+      Scaling & Must manage threads manually & Automatically scalable \\
+      \hline
+      Graceful shutdown & Tricky to implement & \texttt{shutdown()} + \texttt{awaitTermination()} \\
+      \hline
+      Ideal for & Fine control & Real-world task orchestration \\
+      \hline
+    \end{tabularx}
+    \caption{Summary: Executors vs Manual Threads}
+  \end{table}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Lecture recap}
+
+  \begin{table}[h]
+    \centering
+    \begin{tabularx}{\textwidth}{|l|c|c|c|X|}
+      \hline
+      \textbf{Tool} & \textbf{Blocking?} & \textbf{Thread-safe?} & \textbf{Ordering?} & \textbf{Use Case} \\
+      \hline
+      \texttt{wait/notify} & Manual & It depends & ??? & Low-level control \\
+      \hline
+      \texttt{BlockingQ} & Yes & Built-in & FIFO & Producer-consumer \\
+      \hline
+      \texttt{PriorityQ} & Yes & Built-in & Priority & Scheduling and ordered tasks \\
+      \hline
+      \texttt{ExecutorService} & Yes & Built-in & Depends & Modern thread management \\
+      \hline
+    \end{tabularx}
+    \caption{Comparison of Task coordination tools}
+  \end{table}
+\end{frame}
+
+\begin{frame}[fragile]
   \frametitle{Code Listings}
 
   \begin{itemize}
-  \item[\faCode]<1-> LockTestHarness/Spinlock.java: Spinlock implementation
-  \item[\faCode]<1-> LockTestHarness/LockTestHarness.java: Spinlock vs
-    \texttt{synchronized} (single-run)
-  \item[\faCode]<1-> LockTestHarness/LockTestHarness2.java: Spinlock vs
-    \texttt{synchronized} (benchmark)
-  \item[\faCode]<1-> LatchTestHarness/LatchTestHarness.java: Latch (local
-    updates) vs
-    \texttt{synchronized} (single)
-  \item[\faCode]<1-> LatchTestHarness/LatchTestHarness2.java: Latch (local
-    updates) vs
-    \texttt{synchronized} (benchmark)
-  \item[\faCode]<1-> LatchTestHarness/LatchTestHarness2Long.java: Proper
-    benchmarking for latching and local updates using \texttt{long}'s.
-  \item[\faCode]<1-> LatchTestHarness/LatchTestHarness2LongMap.java: Latch
-    (local updates) vs \texttt{ConcurrentHashMap}.
+  \item[\faCode]<1-> WaitNotify/WaitNotifyDemo.java: Buggy \texttt{wait} and
+    \texttt{notify}.
+  \item[\faCode]<1-> BlockingQueues/CleanBlockingQueueDemo.java : fixed
+    aforementioned buggy demo using \texttt{ArrayBlockingQueue}.
+  \item[\faCode]<1-> BlockingQueues/BlockingQueueKitchen.java : A kitchen
+    running using \texttt{LinkedBlockingQueue}.
   \end{itemize}
 
 \end{frame}
