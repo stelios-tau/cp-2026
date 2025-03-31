@@ -313,9 +313,9 @@
 
   \vspace{0.4cm}
 
-  \begin{block}<2->{\faLightbulb \quad Takeaway}
+  \begin{block}<2->{\faLightbulb \quad Key takeaway}
     In this instance, we needed to make sure that enough synchronization attemps
-    were made, but that the vast majority did not lock.
+    were made, but that the vast majority did not lock at all.
   \end{block}
 \end{frame}
 
@@ -337,6 +337,24 @@
 \end{frame}
 
 \section{The producer-consumer pattern}
+
+\begin{frame}[fragile]
+  \frametitle{The producer-consumer pattern}
+
+  \begin{block}<2->{\faLightbulb \quad Key idea}
+    The \textbf{separation} of \emph{work to be done} from the \emph{execution}
+    of the \emph{work}.
+  \end{block}
+
+  \begin{itemize}
+  \item[\faBook]<1-> Presence of a data structure representing a to-do list.
+    \begin{itemize}
+    \item[\faBook]<1-> Producers identify work and creates \emph{tasks}.
+    \item[\faBook]<1-> Consumers pick up and complete the tasks.
+    \end{itemize}
+  \item[\faBook]<1-> Producers and consumers work independently.
+  \end{itemize}
+\end{frame}
 
 \begin{frame}[fragile]
   \frametitle{Busy-wait}
