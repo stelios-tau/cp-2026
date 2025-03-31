@@ -433,7 +433,7 @@
       \hline
       Manual coordination	& \texttt{wait()}, \texttt{notify()} \\
       \hline
-      Thread-safe buffer & \texttt{BlockingQueue} \\
+      Thread-safe buffer & \texttt{BlockingQueue}, \texttt{PriorityBlockingQueue} \\
       \hline
       Task abstraction & \texttt{ExecutorService}, queues \\
       \hline
@@ -443,8 +443,10 @@
   \end{table}
 \end{frame}
 
+\section{\texttt{wait} and \texttt{notify}}
+
 \begin{frame}[fragile]
-  \frametitle{Busy-wait}
+  \frametitle{How to }
 
 \begin{lstlisting}[language = Java , frame = trBL , firstnumber = last ,
 escapeinside={(*@}{@*)}]
@@ -461,7 +463,9 @@ doSomething();
   \end{block}
 \end{frame}
 
+\section{Blocking queues}
 
+\section{Executors}
 
 \begin{frame}[fragile]
   \frametitle{Code Listings}
