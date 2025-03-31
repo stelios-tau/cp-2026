@@ -374,11 +374,11 @@
     \item[\faBook] Dish cleaning etc.
     \end{itemize}
   \end{block}
-  \vspace{0.4cm}
+  \vspace{0.2cm}
   \begin{block}<2->{\faSearch \quad Factory}
     A certain line manufactures parts and consumers assemble the parts together.
   \end{block}
-    \vspace{0.4cm}
+    \vspace{0.2cm}
   \begin{block}<3->{\faPrint \quad Printing}
     Users put printing jobs to the queue, printer picks jobs up and prints.
   \end{block}
@@ -446,24 +446,118 @@
 \section{\texttt{wait} and \texttt{notify}}
 
 \begin{frame}[fragile]
-  \frametitle{How to }
+  \frametitle{Low-Level Thread Coordination}
 
-\begin{lstlisting}[language = Java , frame = trBL , firstnumber = last ,
-escapeinside={(*@}{@*)}]
-while ((something) == 0) {
-        /* do nothing - just keep checking over and over */
+  \begin{block}<1->{\faPuzzlePiece \quad Problem statement}
+    Sometimes, threads need to wait for a condition to become true — and they
+    need to do so without spinning or wasting CPU.
+  \end{block}
+  \vspace{0.4cm}
+  \faBook\quad Java provides low-level methods for this:
+  \begin{itemize}
+  \item[\faBook] \texttt{wait()} — pause and release the intrinsic lock (yes,
+    all of the these methods need to be called from a protected context).
+  \item[\faBook] \texttt{notify()} — wake up one waiting thread.
+  \item[\faBook] \texttt{notifyAll()} — wake up all waiting threads.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Using \texttt{wait} and \texttt{notify}}
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
+frame = trBL , firstnumber = last , escapeinside={(*@}{@*)}]
+class SharedBuffer {
+    private final Queue<String> buffer = new LinkedList<>();
+
+    public synchronized void produce(String item) throws InterruptedException {
+        while (buffer.size() >= 10) wait();
+        buffer.add(item);
+        notifyAll(); // Signal waiting consumers
     }
 
-doSomething();
-\end{lstlisting}
+    public synchronized String consume() throws InterruptedException {
+        while (buffer.isEmpty()) wait();
+        String item = buffer.remove();
+        notifyAll(); // Signal waiting producers
+        return item;
+    }
+}\end{lstlisting}
+\uncover<2->{
+  \begin{tikzpicture}[overlay, remember picture]
+    \node[xshift=10.4cm,yshift=1cm,starburst,starburst points=32,
+    align=center,fill=green!50, opacity=1,draw=pink!50, line width=2pt]
+    {\textbf{Use \texttt{synchronized} blocks!}};
+  \end{tikzpicture}}
+\end{frame}
 
-  \vspace{0.2cm}
-  \begin{block}<1->{\faLightbulb \quad Key idea}
-    Wait -- and keep checking -- until a condition is met.
+\begin{frame}[fragile]
+  \frametitle{Using \texttt{wait} and \texttt{notify}}
+  \begin{block}<1->{\faExclamationTriangle \quad Common issue}
+    You should always call \texttt{wait} and \texttt{notify} (or
+    \texttt{notifyAll}) from a \texttt{synchronized} context, else you will get
+    an \texttt{IllegalMonitorStateException}. This is to avoid race conditions
+    between the various threads and their wake-up signals.
+  \end{block}
+  \vspace{0.4cm}
+  \begin{block}<1->{\faExclamationTriangle \quad Common issue}
+    \texttt{wait}/\texttt{notify} is powerful, but tricky! It is easy to
+    forget to notify all threads, or to miss a notification (if \texttt{notify} is
+    called without another thread waiting, then \texttt{notify} just returns).
+    Both of these may lead to \textbf{deadlocks}.
   \end{block}
 \end{frame}
 
 \section{Blocking queues}
+
+\begin{frame}[fragile]
+  \frametitle{Using queues}
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
+frame = trBL , firstnumber = last , escapeinside={(*@}{@*)}]
+BlockingQueue<String> queue = new LinkedBlockingQueue<>();
+
+// Producer thread
+queue.put("Chop tomatoes");
+
+// Consumer thread
+String task = queue.take();
+System.out.println("Working on: " + task);
+\end{lstlisting}
+  \begin{block}<2->{\faLightbulb \quad Important}
+    \texttt{LinkedBlockingQueue} and \texttt{ArrayBlockingQueue} is FIFO (First
+    In - First Out).
+  \end{block}
+  \vspace{0.2cm}
+  \begin{block}<3->{\faLightbulb \quad Important}
+    Methods \texttt{put} and \texttt{take}. \texttt{add} and \texttt{remove}
+    don't block.
+  \end{block}
+  \uncover<4->{
+    \begin{tikzpicture}[overlay, remember picture]
+      \node[xshift=10.4cm,yshift=5cm,starburst,starburst points=24,
+      align=center,fill=green!50, opacity=1,draw=pink!50, line width=2pt]
+      {\textbf{No sync needed!}};
+    \end{tikzpicture}}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Bounded queues}
+
+  \begin{block}<1->{\faExclamationTriangle \quad No coordination}
+    \begin{itemize}
+    \item[\faUserInjured] Producers overwrite each other's items.
+    \item[\faUserInjured] Consumers read nothing (or invalid data).
+    \item[\faUserInjured] Threads spin or block forever (deadlock).
+    \item[\faUserInjured] Shared buffer becomes corrupted.
+    \end{itemize}
+  \end{block}
+  \vspace{0.4cm}
+  \begin{block}<2->{\faLightbulb \quad Key idea}
+    Bounded queues are a powerful resource management tool for building
+    reliable applications: they make your program more robust to overload
+    by throttling activities that threaten to produce more work than can be
+    handled.
+  \end{block}
+\end{frame}
 
 \section{Executors}
 
