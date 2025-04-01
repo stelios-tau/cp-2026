@@ -10,18 +10,18 @@ public class WaitNotifyDemo {
         Thread consumer = new Thread(() -> {
             synchronized (buffer) {
                 // A loop like the one below might hide the bug.
-                /*while (buffer.isEmpty()) {
+                while (buffer.isEmpty()) {
                     System.out.println("🚫 Consumer waiting...");
                     try {
                         buffer.wait(); // Will wait forever if notify() happens too early
                     } catch (InterruptedException ignored) {}
-                }*/
-                do  {
+                }
+                /*do  {
                     System.out.println("🚫 Consumer waiting...");
                     try {
                         buffer.wait(); // Will wait forever if notify() happens too early
                     } catch (InterruptedException ignored) {}
-                } while (buffer.isEmpty());
+                } while (buffer.isEmpty());*/
 
                 String item = buffer.remove();
                 System.out.println("✅ Consumer got: " + item);
