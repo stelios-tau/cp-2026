@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class WalkExecutorFuture
 {
-	public static void main()
+	public static void main(String[] args)
 	{
 		// word -> number of times it appears over all files
 		Map< String, Integer > occurrences = new HashMap<>();
@@ -24,7 +24,7 @@ public class WalkExecutorFuture
 
 		try {
 			List< Future< Map< String, Integer > > > futures =
-				Files.walk( Paths.get( "data" ) )
+				Files.walk( Paths.get( "lectures/data" ) )
 					.filter( Files::isRegularFile )
 					.map( filepath ->
 						executor.submit( () -> computeOccurrences( filepath ) )
