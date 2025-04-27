@@ -1,0 +1,300 @@
+
+\PassOptionsToPackage{colorlinks,linkcolor={blue},citecolor={blue},urlcolor={blue},breaklinks=true,final}{hyperref}
+\PassOptionsToPackage{dvipsnames}{xcolor}
+\documentclass[xcolor={dvipsnames,svgnames},aspectratio=169]{beamer}
+
+\usepackage{fontawesome5}
+\usepackage{booktabs} % For better table formatting
+\usepackage{listings}
+\usepackage{tabularx}
+
+
+\lstset{
+  tabsize = 4, %% set tab space width
+  showstringspaces = false, %% prevent space marking in strings, string is defined as the text that is generally printed directly to the console
+  numbers = left, %% display line numbers on the left
+  commentstyle = \color{purple!60}, %% set comment color
+  keywordstyle = \color{blue}, %% set keyword color
+  stringstyle = \color{red}, %% set string color
+  rulecolor = \color{black}, %% set frame color to avoid being affected by text color
+  basicstyle = \small \ttfamily , %% set listing font and size
+  breaklines = true, %% enable line breaking
+  numberstyle = \tiny,
+}
+
+\title{Concurrent Programming}
+\subtitle{Week 18 (Lecture 7) : \textbf{Liveness hazards and performance}}
+\author{Stelios Tsampas}
+\institute{
+  \faEnvelope \; stelios@imada.sdu.dk
+  \qquad
+  \faGlobe \;
+  \href{https://www.steliostsampas.com}{https://www.steliostsampas.com}
+  \\\\\
+  \faGithub \; stelios-tau/cp-2025
+  \qquad\;\;
+    \faDiscord \; cp-2025
+}
+\date{\today}
+
+\titlegraphic{\includegraphics[height=0.6cm,keepaspectratio]{../media/sdu-black.eps}}
+
+\usetheme[block=fill]{metropolis}
+
+
+%\usepackage{pres-common}
+\usepackage{textpos}
+\usepackage{centernot}
+
+% \newcommand{\Goesv}[3]{\ensuremath{#1 \xRightarrow{~#3~} #2}}
+% \newcommand{\goesv}[3]{\ensuremath{#1 \xrightarrow{~#3~} #2}}
+
+% \usepackage{etex}
+% \usepackage{semantic}
+
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{tikz}
+\usepackage{hyperref}
+
+\usetikzlibrary{arrows,shapes,matrix}
+\usetikzlibrary{backgrounds}
+\usetikzlibrary{positioning}
+\usetikzlibrary{automata}
+\usetikzlibrary{mindmap}
+\usetikzlibrary{shapes.callouts}
+\usetikzlibrary{decorations.text}
+\usetikzlibrary{tikzmark}
+\usetikzlibrary{calc}
+\usetikzlibrary{overlay-beamer-styles}
+\usetikzlibrary{shapes.geometric}
+\usepackage{pgfplots}
+
+
+\tikzset{onslide/.code args={<#1>#2}{%
+    \only<#1>{\pgfkeysalso{#2}} % \pgfkeysalso doesn't change the path
+  }}
+
+\setbeamercolor{mygray}{bg=Gray!20}
+
+\tikzset{temporal/.code args={<#1>#2#3#4}{%
+    \temporal<#1>{\pgfkeysalso{#2}}{\pgfkeysalso{#3}}{\pgfkeysalso{#4}} % \pgfkeysalso doesn't change the path
+  }}
+
+\tikzstyle{highlight}=[fill=green!50]
+\tikzstyle{hgreen}=[fill=green!20]
+\tikzstyle{hred}=[fill=red!50]
+\tikzstyle{hblue}=[fill=blue!50]
+\tikzstyle{hgray}=[fill=gray!50]
+
+\addtobeamertemplate{frametitle}{}{%
+\begin{textblock*}{100mm}(\textwidth-2cm,-0.86cm)
+\includegraphics[height=0.6cm,keepaspectratio]{../media/sdu-white.eps}
+\end{textblock*}}
+
+
+%\usepackage{tikz-cd}
+% \usepackage{wasysym}
+% \usepackage{color}
+% \usepackage[matrix,arrow]{xy}
+% \xyoption{all}
+% \SelectTips{cm}{}
+% % \usepackage{cite}
+% \usepackage{amsthm}
+% \usepackage{amsmath}
+% \usepackage{bbold}
+% % \usepackage[bbgreekl]{mathbbol}
+% \usepackage{amssymb}
+% \usepackage{pifont}
+% \usepackage{mathtools}
+% \usepackage{amsbsy}
+% % \usepackage{paralist}
+% \usepackage{shadethm}
+% % \usepackage{fancyhdr}
+% \usepackage{stmaryrd}
+% \usepackage{wasysym}
+% \usepackage{graphicx}
+% \usepackage{tabularx}
+% \usepackage{dsfont}
+% \usepackage{ulem}
+
+
+
+
+%\bibliography{mainBiblio}
+
+%\includeonlyframes{current}
+\begin{document}
+
+\frame{\titlepage}
+
+\def\firstcircle{(0,0) circle (2cm)}
+\def\secondcircle{(1.4,1.4) circle (2cm)}
+\def\thirdcircle{(0:2.4) circle (2cm)}
+
+\begin{frame}{Outline}
+  \tableofcontents
+\end{frame}
+
+\section{Recap}
+
+\begin{frame}[fragile]
+  \frametitle{Previously on CP}
+
+  Last lecture, we looked at...
+
+  \begin{itemize}
+  \item[\faBook]<1-> The fundamental producer-consumer pattern, in which the
+    creation of tasks is separated from their undertaking.
+    \begin{itemize}
+    \item[\faBook]<1-> \emph{Producer} threads create tasks, \emph{consumers}
+      complete them.
+    \end{itemize}
+  \item[\faBook]<1-> Low-level thread coordination primitives
+    \begin{itemize}
+    \item[\faBook]<1-> Namely \texttt{wait()}, \texttt{notify()} and
+      \texttt{notifyAll()}.
+    \end{itemize}
+  \item[\faBook]<1-> The \texttt{BlockingQueue} interface as an efficient way to
+    manage tasks.
+  \item[\faBook]<1-> The \texttt{Executor} as an efficient, more advanced way to
+    manage tasks.
+  \end{itemize}
+
+  \vspace{0.4cm}
+
+  \begin{block}<2->{\faLightbulb \quad Key takeaway}
+    The producer-consumer is a ubiquitous pattern arises naturally in many concurrency
+    scenarios (it is not the only one). The developer has many tools to manage
+    tasks in an efficient and reliable manner.
+  \end{block}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{This week's topics}
+
+  This week, we will look at...
+
+  \begin{itemize}
+  \item[\faBook]<1-> Liveness issues!
+  \item[\faBook]<1-> Performance and scalability considerations!
+  \item[\faBook]<1-> Streams in parallel!
+  \item[\faBook]<1-> Some information on the exam!
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Hazards in concurrency}
+
+  In concurrent programming, there are three main classes of hazards:
+
+  \begin{itemize}
+  \item[\faUserInjured]<1-> (Thread) safety issues (e.g. race conditions,
+    publishing etc.).
+  \item[\faUserInjured]<2-> \textbf{Liveness issues}.
+  \item[\faUserInjured]<3-> \textbf{Performance}.
+  \end{itemize}
+
+\end{frame}
+
+\section{Liveness Hazards}
+
+
+
+\begin{frame}[fragile]
+  \frametitle{Liveness in Concurrency}
+
+  \begin{block}<1->{\faSearch \quad Liveness}
+    Something good eventually happens.
+  \end{block}
+
+  In concurrent programs, \textbf{liveness hazards} occur when:
+
+  \begin{itemize}
+  \item[\faUserInjured]<1-> Threads \textbf{don't make progress} toward their
+    goals.
+  \item[\faUserInjured]<1-> Systems appear stuck or unresponsive.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Liveness in Concurrency}
+
+  \begin{block}<1->{\faSearch \quad Liveness}
+    \emph{Something good eventually happens.}
+  \end{block}
+
+  In concurrent programs, \textbf{liveness hazards} occur when:
+
+  \begin{itemize}
+  \item[\faUserInjured]<1-> Threads \textbf{don't make progress} toward their
+    goals.
+  \item[\faUserInjured]<1-> Systems appear stuck or unresponsive.
+  \end{itemize}
+
+  The three classic problems are \textbf{Deadlock}, \textbf{starvation} and
+  \textbf{livelock}.
+
+  \vspace{0.2cm}
+
+  \begin{block}<2->{\faExclamationTriangle \quad Warning}
+    Liveness issues are elusive, do not manifest easily, so extra care is
+    needed.
+  \end{block}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{\faSkull \quad Deadlock}
+
+  \begin{block}<1->{\faSearch \quad What is a deadlock?}
+    The condition during execution where two or more threads are blocked
+    forever, waiting for each other.
+  \end{block}
+
+  \begin{block}<1->{\faSearch \quad Real-world example}
+    Two cars are stuck on a one-way bridge, blocking each other.
+  \end{block}
+
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Starvation}
+
+  \begin{block}<1->{\faSearch \quad Real-world example}
+    Waiting forever in the emergency room in a hospital because more serious
+    cases keep coming up. \uncover<2->{We've all been there.}
+  \end{block}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Livelock}
+
+  \begin{block}<1->{\faSearch \quad Real-world example}
+    Two friends keep calling each other because the line is busy.
+    \uncover<2->{We've all been there.}
+  \end{block}
+
+\end{frame}
+
+\section{Performance and Scalability}
+
+\section{(Parallel) Streams}
+
+\section{The Exam}
+
+\begin{frame}{}
+  \centering \huge
+  Thank you!
+\end{frame}
+
+\end{document}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-engine: xetex
+%%% TeX-master: t
+%%% End:
