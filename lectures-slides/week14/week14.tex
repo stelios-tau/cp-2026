@@ -416,9 +416,13 @@
     \item[\faUserInjured] Shared buffer becomes corrupted.
     \end{itemize}
   \end{block}
-  \vspace{0.4cm}
+  \vspace{0.2cm}
   \begin{block}<2->{\faBriefcaseMedical \quad Solution}
     We need a way to synchronize access to the buffer!
+  \end{block}
+    \vspace{0.2cm}
+  \begin{block}<3->{\faExclamationTriangle \quad Remember}
+    Standard mutable state issues still apply.
   \end{block}
 \end{frame}
 
@@ -463,7 +467,7 @@
 \begin{frame}[fragile]
   \frametitle{Using \texttt{wait} and \texttt{notify}}
 \begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
-frame = trBL , firstnumber = last , escapeinside={(*@}{@*)}]
+frame = trBL , firstnumber = last , escapeinside={(*@}{@*)},numbers=none]
 class SharedBuffer {
     private final Queue<String> buffer = new LinkedList<>();
 
@@ -541,7 +545,7 @@ class SharedBuffer {
 \begin{frame}[fragile]
   \frametitle{Using \texttt{BlockingQueue}}
 \begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
-frame = trBL , firstnumber = last , escapeinside={(*@}{@*)}]
+frame = trBL , firstnumber = last , escapeinside={(*@}{@*)},numbers=none]
 BlockingQueue<String> queue = new LinkedBlockingQueue<>();
 
 // Producer thread
@@ -571,7 +575,7 @@ System.out.println("Working on: " + task);
 \begin{frame}[fragile]
   \frametitle{Using \texttt{BlockingQueue} (with priority)}
 \begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
-frame = trBL , firstnumber = last , escapeinside={(*@}{@*)}]
+frame = trBL , firstnumber = last , escapeinside={(*@}{@*)},numbers=none]
 BlockingQueue<Task> queue = new PriorityBlockingQueue<>();
 
 queue.put(new Task("Boil water", 3));
@@ -594,7 +598,7 @@ System.out.println(next.name);
 \begin{frame}[fragile]
   \frametitle{Using \texttt{BlockingDeque}}
 \begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
-frame = trBL , firstnumber = last , escapeinside={(*@}{@*)}]
+frame = trBL , firstnumber = last , escapeinside={(*@}{@*)},numbers=none]
 Deque<String> deque = new ArrayDeque<>();
 
 // Add to front and back
@@ -618,16 +622,15 @@ String last  = deque.removeLast();  // 🍅
   \frametitle{The problem with manual thread management}
 
 \begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
-frame = trBL , firstnumber = last , escapeinside={(*@}{@*)}]
+frame = trBL , firstnumber = last , escapeinside={(*@}{@*)},numbers=none]
 Thread t = new Thread(() -> doWork());
 t.start();
 \end{lstlisting}
 
   \begin{itemize}
   \item[\faBook] Threads are expensive to create.
-  \item[\faBook] Little control over how many are running.
   \item[\faBook] No way to reuse them.
-  \item[\faBook] No easy task scheduling or result tracking
+  \item[\faBook] No easy task scheduling or result tracking.
   \end{itemize}
 
   \begin{block}<2->{\faLightbulb \quad Solution}
@@ -643,7 +646,7 @@ t.start();
   \textbf{submit tasks} and let the Executor handle \textbf{thread management}.
 
 \begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
-frame = trBL , firstnumber = last , escapeinside={(*@}{@*)}]
+frame = trBL , firstnumber = last , escapeinside={(*@}{@*)},numbers=none]
 ExecutorService pool = Executors.newFixedThreadPool(4);
 
 pool.submit(() -> {
@@ -692,7 +695,7 @@ pool.submit(() -> {
   \frametitle{Submitting tasks}
 
 \begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
-frame = trBL , firstnumber = last , escapeinside={(*@}{@*)}]
+frame = trBL , firstnumber = last , escapeinside={(*@}{@*)},numbers=none]
 ExecutorService pool = Executors.newFixedThreadPool(4);
 
 // Fire-and-forget
@@ -712,7 +715,7 @@ Future<Integer> result = pool.submit(() -> computeAnswer());
   \frametitle{Cleaning up}
 
 \begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
-frame = trBL , firstnumber = last , escapeinside={(*@}{@*)}]
+frame = trBL , firstnumber = last , escapeinside={(*@}{@*)},numbers=none]
 pool.shutdown();           // Initiates graceful shutdown
 pool.awaitTermination(5, TimeUnit.SECONDS);
 
