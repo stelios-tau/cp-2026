@@ -484,7 +484,7 @@ frame = trBL , firstnumber = last , escapeinside={(*@}{@*)},numbers=none]
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{\faSkull \quad Avoiding Deadlocks}
+  \frametitle{\faBriefcaseMedical \quad Avoiding Deadlocks}
 
   \begin{block}{\faExclamationTriangle \quad Remember}
     Deadlocks, i.e. potential cyclic dependencies in locks, can be buried very
@@ -507,21 +507,114 @@ frame = trBL , firstnumber = last , escapeinside={(*@}{@*)},numbers=none]
 \begin{frame}[fragile]
   \frametitle{Starvation}
 
-  \begin{block}<1->{\faSearch \quad Real-world example}
+  \begin{block}<1->{\faSearch \quad What is starvation?}
+    The situation where a thread/task is constantly denied access to resources to
+    function (e.g. a lock, CPU time) because of other threads.
+  \end{block}
+  \vspace{0.5cm}
+  \begin{block}<2->{\faSearch \quad When does it occur?}
+    By inappropriate use of thread (OS-level) or \textbf{task} priorities.
+  \end{block}
+  \vspace{0.5cm}
+  \begin{block}<3->{\faSearch \quad Real-world example}
     Waiting forever in the emergency room in a hospital because more serious
-    cases keep coming up. \uncover<2->{We've all been there.}
+    cases keep coming up. \uncover<4->{We've all been there.}
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Starvation example}
+
+  \centering \huge
+  Live demo
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Avoiding Starvation}
+
+  \begin{block}{\faExclamationTriangle \quad Remember}
+    Starvations are all about improper handling of task/thread priority.
+  \end{block}
+
+  Here are some tips to avoid starvation:
+
+  \begin{itemize}
+  \item[\faBook]<2-> Resist the temptation to use OS-level priorities.
+  \item[\faBook]<3-> Design and implement your task priority carefully. Be
+    careful of \textbf{retry-storms}.
+  \item[\faBook]<4-> If all tasks have equal priority, make sure your code does
+    not introduce implicit prioritization.
+  \end{itemize}
+
+\end{frame}
+
+
+
+\begin{frame}[fragile]
+  \frametitle{Livelock}
+
+  \begin{block}<1->{\faSearch \quad What is a livelock?}
+    A livelock occurs when two or more threads repeat the same interaction in
+    response to changes in the state of other processes, but no progress is
+    made. \uncover<2->{According to Goetz, a livelock can also occur to a
+      single-thread in a kind of \emph{poison-message} scenario, where a
+      thread \emph{independently} retries an operation.}
+  \end{block}
+  \vspace{0.5cm}
+  \begin{block}<3->{\faSearch \quad Real-world example}
+    Two friends keep calling each other because the line is busy.
+    \uncover<4->{We've all been there.}
   \end{block}
 
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Livelock}
+  \frametitle{Livelock example}
 
-  \begin{block}<1->{\faSearch \quad Real-world example}
-    Two friends keep calling each other because the line is busy.
-    \uncover<2->{We've all been there.}
+  \centering \huge
+  Live demo
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Avoiding livelocks}
+
+  \begin{block}{\faExclamationTriangle \quad Remember}
+    Livelocks often occur because of a very eager retry strategy.
   \end{block}
 
+  Hence, to avoid livelocks, one has to avoid retry storms by...
+
+  \begin{itemize}
+  \item[\faBook]<2-> Limiting the number of retries.
+  \item[\faBook]<3-> Backing off after no progress has been detected.
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Liveness recap}
+
+  \begin{table}[h]
+    \centering
+    \begin{tabularx}{\textwidth}{|l|c|c|c|X|}
+      \hline
+      \textbf{Hazard} & \textbf{Symptom} & \textbf{Blocking?} & \textbf{Active?}
+      & \textbf{Example} \\
+      \hline
+      Deadlock & No progress & Yes & No & Two threads jointly waiting for locks
+                                          that are held by the other.
+      \\
+      \hline
+      Starvation & $\leq 1$ Threads stuck & No & Others
+      & Greedy thread hogs lock or other resource. \\
+      \hline
+      Livelock & Constant retrying & No & Yes & Two threads yielding to each other.\\
+      \hline
+    \end{tabularx}
+    \caption{Comparison of liveness hazards.}
+  \end{table}
 \end{frame}
 
 \section{Performance and Scalability}
