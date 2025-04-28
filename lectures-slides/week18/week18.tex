@@ -619,9 +619,115 @@ frame = trBL , firstnumber = last , escapeinside={(*@}{@*)},numbers=none]
 
 \section{Performance and Scalability}
 
+\begin{frame}[fragile]
+  \frametitle{Performance and scalability}
+
+  \begin{block}<1->{\faSearch \quad What is a deadlock?}
+    The condition during execution where two or more threads are blocked
+    forever, waiting for each other.
+  \end{block}
+
+  \vspace{0.5cm}
+
+  \begin{block}<2->{\faSearch \quad When does it occur?}
+    Multiple patterns, typically involves a \textbf{cyclic dependency} of locks
+    between multiple threads.
+  \end{block}
+
+  \vspace{0.5cm}
+
+  \begin{block}<3->{\faSearch \quad Real-world example}
+    Two cars are stuck on a one-way bridge, blocking each other.
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Performance and scalability vs parallelism}
+\begin{itemize}
+\item[\faBook]<1-> At the beginning, I made a big fuss over concurrent
+  programming  not being the same as parallel programming.
+\item[\faBook]<2-> This is true, especially conceptually.
+\item[\faBook]<3-> However, being able to make efficient use of the
+  computational resources in a concurrent scenario hinges on
+  \emph{parallelism}.
+  \begin{itemize}
+  \item[\faBook]<3-> Identifying the sources of serialization and the
+    independent, parallelizable parts.
+  \item[\faBook]<3-> Using all available CPU threads.
+  \end{itemize}
+\item[\faBook]<4-> Hence, parallelism \emph{encourages} concurrency.
+\end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Recall Week 14}
+
+  \begin{block}<1->{\faLightbulb \quad Key takeaway}
+    The more computation intensive an independent task is, the more negligible
+    the synchronization overhead is.
+  \end{block}
+
+  \vspace{0.4cm}
+
+  \begin{block}<2->{\faLightbulb \quad Key takeaway}
+    The larger the serialized part is, the less one stands to gain from parallelism.
+  \end{block}
+
+  \vspace{0.4cm}
+
+  \begin{block}<3->{\faLightbulb \quad Amdahl's law}
+    \[
+      \mathrm{Speedup} \leq \frac{1}{F + \frac{1-F}{N}}
+    \]
+    In the above, $N$ is the number of threads and $F$ the \emph{fraction} of
+    the \emph{serialized} code.
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Recall Week 14}
+
+
+\end{frame}
+
 \section{(Parallel) Streams}
 
-\section{The Exam}
+\begin{frame}[fragile]
+  \frametitle{More general than you think}
+  \begin{itemize}
+  \item[\faBook]<1-> At a glance, streams feel very specific.
+  \item[\faBook]<2-> However, almost every interaction of the computer with the
+    outer world boils down to \emph{files} and \emph{streams}.
+  \item[\faBook]<3-> In fact, the two core concepts of Operating Systems are
+    \emph{processes} and \emph{files}.
+  \end{itemize}
+
+  \vspace{0.6cm}
+
+  \begin{block}<4->{\faLightbulb \quad How about Parallel Streams?}
+    \uncover<5->{Also general! They manifest the \textbf{MapReduce} paradigm for
+    Java!}
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{MapReduce?}
+
+  \begin{block}<1->{\faLightbulb \quad What is the MapReduce paradigm?}
+    The MapReduce paradigm applies to the (very) broad class of problems whose
+    input data is a large collection and their solutions have this pattern:
+    \begin{enumerate}
+    \item A uniform operation (or a sequence) is applied to every element
+      of the collection (\textbf{Map} in \textbf{Map}Reduce).
+    \item The results are then aggregated together via a method of
+      \emph{reduction} (\textbf{Reduce} in Map\textbf{Reduce}.)
+    \end{enumerate}
+  \end{block}
+
+\end{frame}
+
+\section{Some info on the Exam}
 
 \begin{frame}{}
   \centering \huge
