@@ -59,6 +59,7 @@
 
 \usetikzlibrary{arrows,shapes,matrix}
 \usetikzlibrary{backgrounds}
+\usetikzlibrary{arrows.meta}
 \usetikzlibrary{positioning}
 \usetikzlibrary{automata}
 \usetikzlibrary{mindmap}
@@ -298,6 +299,38 @@ Thread t2 = new Thread(() -> {
 \end{frame}
 
 \begin{frame}[fragile]
+  \title{Wait-for-graph}
+
+  \begin{center}
+    \begin{tikzpicture}[
+      thread/.style={rectangle, draw=blue!60, fill=blue!10, thick, minimum width=2cm, minimum height=1cm},
+      lock/.style={circle, draw=red!60, fill=red!10, thick, minimum size=1cm},
+      arrow/.style={->, thick, >=Stealth}
+      ]
+
+      % Nodes
+      \node[thread] (T1) {Thread 1};
+      \node[lock, below=of T1] (A) {Lock A};
+
+      \node[thread, right=3cm of T1] (T2) {Thread 2};
+      \node[lock, below=of T2] (B) {Lock B};
+
+      % Arrows
+      \draw[arrow] (T1) -- (A);
+      \draw[arrow] (T2) -- (B);
+      \draw[arrow,purple,dashed] (B) -- (T1);
+      \draw[arrow,purple,dashed] (A) to[bend right=50] (T2);
+
+    \end{tikzpicture}
+  \end{center}
+
+  \begin{block}<2->{\faPuzzlePiece \quad What is wrong?}
+    \uncover<3>{There's a cyclic dependency, meaning we have a deadlock!}
+  \end{block}
+
+\end{frame}
+
+\begin{frame}[fragile]
   \frametitle{\faSkull \quad Deadlock example (2)}
 
 \begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
@@ -325,6 +358,43 @@ Thread t3 = new Thread(() -> {
 \end{frame}
 
 \begin{frame}[fragile]
+  \title{Wait-for-graph}
+
+  \begin{center}
+    \begin{tikzpicture}[
+      thread/.style={rectangle, draw=blue!60, fill=blue!10, thick, minimum width=2cm, minimum height=1cm},
+      lock/.style={circle, draw=red!60, fill=red!10, thick, minimum size=1cm},
+      arrow/.style={->, thick, >=Stealth}
+      ]
+
+      % Nodes
+      \node[thread] (T1) {Thread 1};
+      \node[lock, below=of T1] (A) {Lock A};
+
+      \node[thread, right=3cm of T1] (T2) {Thread 2};
+      \node[lock, below=of T2] (B) {Lock B};
+
+      \node[thread, right=3cm of T2] (T3) {Thread 3};
+      \node[lock, below=of T3] (C) {Lock C};
+
+      % Arrows
+      \draw[arrow] (T1) -- (A);
+      \draw[arrow] (T2) -- (B);
+      \draw[arrow,purple,dashed] (B) -- (T1);
+      \draw[arrow] (T3) -- (C);
+      \draw[arrow,purple,dashed] (C) -- (T2);
+      \draw[arrow,purple,dashed] (A) to[bend right=50] (T3);
+
+    \end{tikzpicture}
+  \end{center}
+
+  \begin{block}<2->{\faPuzzlePiece \quad What is wrong?}
+    A more complex cyclic dependency!
+  \end{block}
+
+\end{frame}
+
+\begin{frame}[fragile]
   \frametitle{\faSkull \quad Deadlock example (3)}
 
 \begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
@@ -343,13 +413,13 @@ class Database {
 
 
 
-  \begin{block}<3->{\faSearch \quad Whats going on?}
-    Imagine a thread calling \texttt{unlock()}, while another that already holds
+  \begin{block}<3->{\faPuzzlePiece \quad What's going on?}
+    \uncover<4->{Imagine a thread calling \texttt{unlock()}, while another that already holds
     the (shared) \texttt{Database} lock, tries to use some synchronized class on
-    the same instance of \texttt{Safe}.
+    the same instance of \texttt{Safe}.}
   \end{block}
 
-  \begin{block}<3->{\faLightbulb \quad Key takeaway}
+  \begin{block}<4->{\faLightbulb \quad Key takeaway}
     Calling external synchronized methods while holding a lock is dangerous.
   \end{block}
 
@@ -357,8 +427,81 @@ class Database {
     \begin{tikzpicture}[overlay, remember picture]
       \node[xshift=10.4cm,yshift=7cm,starburst,starburst points=20,
       align=center,fill=yellow, opacity=1,draw=red, line width=2pt]
-      {\textbf{Open call!}};
+      {\textbf{Closed call!}};
     \end{tikzpicture}}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{\faSkull \quad Deadlock example (4)}
+
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
+frame = trBL , firstnumber = last , escapeinside={(*@}{@*)},numbers=none]
+  public void transferMoney(Account fromAcc, Account toAcc, DollarAmount amount) {
+    synchronized (fromAcc) {
+      synchronized (toAcc) {
+        if (fromAcc.hasSufficientBalance(amount) {
+          fromAcc.debit(amount);
+          toAcc.credit(amount);
+        }
+      }
+    }
+  }
+\end{lstlisting}
+
+  \begin{block}<2->{\faPuzzlePiece \quad What's going on?}
+    \uncover<3->{The order of lock acquisition depends on the \emph{caller}.}
+    \uncover<4->{If a thread calls \texttt{transferMoney}(acc1, acc2, amount1)
+      and another \texttt{transferMoney}(acc2, acc1, amount2), you may run into
+    a deadlock!}
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{\faSkull \quad Deadlock example (4), rectified}
+
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
+frame = trBL , firstnumber = last , escapeinside={(*@}{@*)},numbers=none]
+ public void transferMoney(Account fromAcc, Account toAcc, DollarAmount amount) {
+    Account firstLock, secondLock;
+    if (fromAcc.accountNumber() == toAcc.accountNumber())
+      throw new Exception("Cannot transfer from account to itself");
+    else if (fromAcc.accountNumber() < toAcc.accountNumber()) {
+      firstLock = fromAcc; secondLock = toAcc;
+    }
+    else {
+      firstLock = toAcc; secondLock = fromAcc;
+    }
+    synchronized (firstLock) {
+      synchronized (secondLock) {
+        if (fromAcc.hasSufficientBalance(amount) {
+          fromAcc.debit(amount);
+          toAcc.credit(amount);
+        }
+      }
+    }
+  }
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{\faSkull \quad Avoiding Deadlocks}
+
+  \begin{block}{\faExclamationTriangle \quad Remember}
+    Deadlocks, i.e. potential cyclic dependencies in locks, can be buried very
+    deeply in the code. It is thus important to practice extra care when you
+    work with multiple locks.
+  \end{block}
+
+  Here are some tips to avoid deadlocks:
+
+  \begin{itemize}
+  \item[\faBook]<2-> Enfore a global order on lock acquisition!
+  \item[\faBook]<3-> Use \texttt{tryLock} that allow a thread to stop waiting
+    after user-supplied timeout. This way you can detect potential deadlocks
+    based on the failure of \texttt{tryLock}.
+  \item[\faBook]<4-> Use \textbf{open calls} instead of the risky closed calls.
+  \end{itemize}
+
 \end{frame}
 
 \begin{frame}[fragile]
