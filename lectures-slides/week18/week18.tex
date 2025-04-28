@@ -151,9 +151,9 @@
     \item[\faBook]<1-> \emph{Producer} threads create tasks, \emph{consumers}
       complete them.
     \end{itemize}
-  \item[\faBook]<1-> Low-level thread coordination primitives
+  \item[\faBook]<1-> Low-level thread coordination primitives,
     \begin{itemize}
-    \item[\faBook]<1-> Namely \texttt{wait()}, \texttt{notify()} and
+    \item[\faBook]<1-> namely \texttt{wait()}, \texttt{notify()} and
       \texttt{notifyAll()}.
     \end{itemize}
   \item[\faBook]<1-> The \texttt{BlockingQueue} interface as an efficient way to
@@ -165,9 +165,9 @@
   \vspace{0.4cm}
 
   \begin{block}<2->{\faLightbulb \quad Key takeaway}
-    The producer-consumer is a ubiquitous pattern arises naturally in many concurrency
-    scenarios (it is not the only one). The developer has many tools to manage
-    tasks in an efficient and reliable manner.
+    The producer-consumer pattern is a ubiquitous pattern arises naturally in
+    many concurrency scenarios (it is not the only one). The developer has many
+    tools to manage tasks in an efficient and reliable manner.
   \end{block}
 
 \end{frame}
@@ -186,9 +186,9 @@
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Hazards in concurrency}
+  \frametitle{Pitfalls in concurrency}
 
-  In concurrent programming, there are three main classes of hazards:
+  In concurrent programming, there are three main classes of pitfalls:
 
   \begin{itemize}
   \item[\faUserInjured]<1-> (Thread) safety issues (e.g. race conditions,
@@ -622,22 +622,39 @@ frame = trBL , firstnumber = last , escapeinside={(*@}{@*)},numbers=none]
 \begin{frame}[fragile]
   \frametitle{Performance and scalability}
 
-  \begin{block}<1->{\faSearch \quad What is a deadlock?}
-    The condition during execution where two or more threads are blocked
-    forever, waiting for each other.
+  \begin{block}<1->{\faFlagCheckered \quad What is a performance?}
+    How fast is a system. Measures include \textbf{throughput} (tasks completed
+    per unit time) and \textbf{latency} (time to complete a task). \textbf{How fast?}
   \end{block}
 
-  \vspace{0.5cm}
+  \vspace{0.4cm}
 
-  \begin{block}<2->{\faSearch \quad When does it occur?}
-    Multiple patterns, typically involves a \textbf{cyclic dependency} of locks
-    between multiple threads.
+  \begin{block}<2->{\faMountain \quad What is scalability?}
+    Measures the ability to improve throughput or capacity when
+    additional computing resources (such as additional CPUs, memory etc.) are
+    added. \textbf{How much?}
   \end{block}
 
-  \vspace{0.5cm}
+  \vspace{0.4cm}
 
-  \begin{block}<3->{\faSearch \quad Real-world example}
-    Two cars are stuck on a one-way bridge, blocking each other.
+  \begin{block}<3->{\faLightbulb \quad Performance vs scalability}
+    Performance and scalability are separate measurements, often at odds. For
+    instance, many tricks that improve raw perfomance (e.g. caching) hurt
+    scalability.
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{A common ground}
+
+  In concurrency, I find that performance and scalability both generally boil down to one
+  common, critical parameter.
+
+  \vspace{0.6cm}
+
+  \begin{block}<2->{\faLightbulb \quad Utilization}
+    Efficient, scalable concurrent programming relies on maximizing the amount
+    of utilization of system resources (e.g. CPU power first and foremost).
   \end{block}
 \end{frame}
 
@@ -664,19 +681,12 @@ frame = trBL , firstnumber = last , escapeinside={(*@}{@*)},numbers=none]
   \frametitle{Recall Week 14}
 
   \begin{block}<1->{\faLightbulb \quad Key takeaway}
-    The more computation intensive an independent task is, the more negligible
-    the synchronization overhead is.
-  \end{block}
-
-  \vspace{0.4cm}
-
-  \begin{block}<2->{\faLightbulb \quad Key takeaway}
     The larger the serialized part is, the less one stands to gain from parallelism.
   \end{block}
 
-  \vspace{0.4cm}
+  \vspace{0.6cm}
 
-  \begin{block}<3->{\faLightbulb \quad Amdahl's law}
+  \begin{block}<2->{\faLightbulb \quad Amdahl's law}
     \[
       \mathrm{Speedup} \leq \frac{1}{F + \frac{1-F}{N}}
     \]
@@ -686,8 +696,41 @@ frame = trBL , firstnumber = last , escapeinside={(*@}{@*)},numbers=none]
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Recall Week 14}
+  \frametitle{Amdahl's law}
 
+  \begin{center}
+    \includegraphics[width=10cm,keepaspectratio]{../media/Amdahls.png}
+  \end{center}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Tips and tricks}
+
+  \begin{itemize}
+  \item[\faBook]<1-> Break locks into smaller ones.
+  \item[\faBook]<1-> Reduce critical sections.
+  \item[\faBook]<1-> Use non-blocking data structures.
+  \item[\faBook]<1-> Use non-blocking data structures.
+  \item[\faBook]<1-> Use atomic variables (e.g., \texttt{AtomicInteger}).
+  \item[\faBook]<1-> Use \texttt{ReadWriteLock} if reads dominate.
+  \item[\faBook]<1-> Use lock-free and wait-free algorithms.
+  \item[\faBook]<1-> Prefer short-lived, non-blocking tasks.
+  \item[\faBook]<1-> Avoid "synchronized(this)" on large classes.
+  \item[\faBook]<1-> Design systems to degrade gracefully under load.
+  \end{itemize}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Recap}
+
+  \begin{itemize}
+  \item[\faBook]<1-> Scalability = Concurrency done well.
+  \item[\faBook]<1-> Minimize blocking, contention, and switching.
+  \item[\faBook]<1-> Think about critical paths and Amdahl’s Law.
+  \item[\faBook]<1-> Good concurrency = smarter designs, not just "more threads".
+  \end{itemize}
 
 \end{frame}
 
@@ -696,11 +739,11 @@ frame = trBL , firstnumber = last , escapeinside={(*@}{@*)},numbers=none]
 \begin{frame}[fragile]
   \frametitle{More general than you think}
   \begin{itemize}
-  \item[\faBook]<1-> At a glance, streams feel very specific.
+  \item[\faBook]<1-> At a glance, Streams feel very specific.
   \item[\faBook]<2-> However, almost every interaction of the computer with the
     outer world boils down to \emph{files} and \emph{streams}.
-  \item[\faBook]<3-> In fact, the two core concepts of Operating Systems are
-    \emph{processes} and \emph{files}.
+  \item[\faBook]<3-> In fact, the file is one of the two core
+    concepts and programming struture of Operating Systems, the other being the process.
   \end{itemize}
 
   \vspace{0.6cm}
@@ -728,6 +771,24 @@ frame = trBL , firstnumber = last , escapeinside={(*@}{@*)},numbers=none]
 \end{frame}
 
 \section{Some info on the Exam}
+
+\begin{frame}[fragile]
+  \frametitle{Exam info}
+
+  \begin{itemize}
+  \item[\faBook]<1-> One large Java file.
+  \item[\faBook]<1-> Visit
+    \href{https://github.com/fmontesi/cp-2024/tree/main/exam}{https://github.com/fmontesi/cp-2024/tree/main/exam}
+    for last year's exam.
+  \item[\faBook]<1-> This year's exam will follow a similar recipe.
+  \item[\faBook]<1-> What matters is code quality and demonstrating good
+    command of what we have covered.
+  \item[\faBook]<1-> Correctness is more important than speed (you need to use
+    concurrent methods, of course).
+  \item[\faBook]<1-> We will discuss more next week.
+  \end{itemize}
+
+\end{frame}
 
 \begin{frame}{}
   \centering \huge
