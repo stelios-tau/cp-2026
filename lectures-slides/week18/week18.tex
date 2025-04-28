@@ -253,11 +253,112 @@
     forever, waiting for each other.
   \end{block}
 
-  \begin{block}<1->{\faSearch \quad Real-world example}
-    Two cars are stuck on a one-way bridge, blocking each other.
+    \vspace{0.5cm}
+
+    \begin{block}<2->{\faSearch \quad When does it occur?}
+    Multiple patterns, typically involves a \textbf{cyclic dependency} of locks
+    between multiple threads.
   \end{block}
 
+  \vspace{0.5cm}
 
+  \begin{block}<3->{\faSearch \quad Real-world example}
+    Two cars are stuck on a one-way bridge, blocking each other.
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{\faSkull \quad Deadlock example (1)}
+
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
+frame = trBL , firstnumber = last , escapeinside={(*@}{@*)},numbers=none]
+Thread t1 = new Thread(() -> {
+    synchronized (lockA) {
+        synchronized (lockB) { System.out.println("Thread 1 done"); }
+    }
+});
+
+Thread t2 = new Thread(() -> {
+    synchronized (lockB) {
+        synchronized (lockA) { System.out.println("Thread 2 done"); }
+    }
+});
+\end{lstlisting}
+
+    \uncover<2->{
+    \begin{tikzpicture}[overlay, remember picture]
+      \node[xshift=10.4cm,yshift=3cm,starburst,starburst points=40,
+      align=center,fill=yellow, opacity=1,draw=red, line width=2pt]
+      {\textbf{\texttt{t1} waits B, \texttt{t2} waits A \faSkullCrossbones!}};
+    \end{tikzpicture}}
+
+  \begin{block}<3->{\faLightbulb \quad Key takeaway}
+    Threads accessing \textbf{multiple} locks in \textbf{different} order is a source of deadlocks.
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{\faSkull \quad Deadlock example (2)}
+
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
+frame = trBL , firstnumber = last , escapeinside={(*@}{@*)},numbers=none]
+Thread t1 = new Thread(() -> {
+    synchronized (lockA) {
+        synchronized (lockB) { System.out.println("Thread 1 done"); }
+    }
+});
+Thread t2 = new Thread(() -> {
+    synchronized (lockB) {
+        synchronized (lockC) { System.out.println("Thread 2 done"); }
+    }
+});
+Thread t3 = new Thread(() -> {
+    synchronized (lockC) {
+        synchronized (lockA) { System.out.println("Thread 3 done"); }
+    }
+});
+\end{lstlisting}
+
+  \begin{block}<2->{\faLightbulb \quad Key takeaway}
+    Cyclic dependency of resources can occur with any number of threads.
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{\faSkull \quad Deadlock example (3)}
+
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
+frame = trBL , firstnumber = last , escapeinside={(*@}{@*)},numbers=none]
+class Safe {
+    synchronized void unlock() {
+        Database.logAccess(this);  // External method call while holding lock!
+    }
+}
+class Database {
+    static synchronized void logAccess(Safe s) {
+        System.out.println("Accessing safe %n", s.id);
+    }
+}
+\end{lstlisting}
+
+
+
+  \begin{block}<3->{\faSearch \quad Whats going on?}
+    Imagine a thread calling \texttt{unlock()}, while another that already holds
+    the (shared) \texttt{Database} lock, tries to use some synchronized class on
+    the same instance of \texttt{Safe}.
+  \end{block}
+
+  \begin{block}<3->{\faLightbulb \quad Key takeaway}
+    Calling external synchronized methods while holding a lock is dangerous.
+  \end{block}
+
+      \uncover<2->{
+    \begin{tikzpicture}[overlay, remember picture]
+      \node[xshift=10.4cm,yshift=7cm,starburst,starburst points=20,
+      align=center,fill=yellow, opacity=1,draw=red, line width=2pt]
+      {\textbf{Open call!}};
+    \end{tikzpicture}}
 \end{frame}
 
 \begin{frame}[fragile]
