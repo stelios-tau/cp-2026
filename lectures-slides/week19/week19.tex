@@ -241,7 +241,7 @@
     in Go and \emph{coroutines} in Kotlin show that millions of lightweight
     threads can be managed efficiently. These languages let developers write
     blocking code efficiently.
-  \item[\faBook]<2-> The goal of Project Loom is to bring similar lightweight
+  \item[\faBook]<2-> The goal of \textbf{Project Loom} is to bring similar lightweight
     concurrency to Java, essentially by \emph{decoupling} Java's notion of a
     thread from OS-level threads, enabling a huge number of threads with minimal
     overhead.
@@ -262,23 +262,23 @@
 
 \section{Virtual Threads}
 
-\begin{frame}[fragile]
-  \frametitle{  What are Virtual Threads?}
+\begin{frame}[fragile, shrink=5]
+  \frametitle{ What are Virtual Threads?}
 
   \begin{itemize}
   \item[\faBook]<1-> \textbf{Lightweight Java Threads:}
     Virtual threads are instances of \texttt{java.lang.Thread} that are
     not backed by a dedicated OS thread for their lifetime. They are managed by
     the JVM, much like user-mode threads (sometimes called ``green threads'').
-  \item[\faBook]<2-> \textbf{Many-to-Few Mapping:}  The JVM can schedule many
+  \item[\faBook]<1-> \textbf{Many-to-Many\,\footnote{More like Many-to-\emph{Few}.} Mapping:}  The JVM can schedule many
     virtual threads on a small pool of OS threads (called carrier threads). It’s
     analogous to virtual memory: many virtual threads are multiplexed onto
     limited physical threads.
-  \item[\faBook]<3-> \textbf{Same API as Threads:} A virtual thread behaves like
+  \item[\faBook]<1-> \textbf{Same API as Threads:} A virtual thread behaves like
     a normal thread from the developer's perspective – it has a \texttt{Thread} object,
     can have a name, can be interrupted, etc. – but it’s extremely lightweight
     to create and maintain.
-  \item[\faBook]<4-> \textbf{Use Case:} Designed for tasks that spend a lot of
+  \item[\faBook]<1-> \textbf{Use Case:} Designed for tasks that spend a lot of
     time blocked or waiting (I/O-bound tasks). They are not intended to speed up
     CPU-intensive work, but to allow vastly more \textbf{concurrent} operations.
   \end{itemize}
@@ -359,6 +359,13 @@ try (ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor()) {
     reading thousands of pages/files, you can assign one virtual thread per
     URL/file (\emph{thread-per-task}).
   \end{itemize}
+
+    \uncover<2->{
+    \begin{itemize}
+      \item[\faLightbulb] High-concurrency servers, microservices with I/O,
+        batch processing and ETL (Extract, Transform, Load) applications are all
+        a great fit for virtual threads.
+  \end{itemize}}
 \end{frame}
 
 \begin{frame}[fragile, shrink=15]
@@ -433,25 +440,17 @@ try (ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor()) {
   \frametitle{Best practices for virtual threads}
 
   \begin{itemize}
-  \item[\faBook] \textbf{Use synchronous, blocking methods:} The whole point of
+  \item[\faCheck]<1-> \textbf{Use synchronous, blocking methods:} The whole point of
     virtual threads is to enable simple, synchronous, sequential thread-per-task
     style code. Avoid asynchronous code with callbacks.
-  \item[\faBook] \textbf{No need for pools:} As explained earlier.
-  \item[\faBook] \textbf{\texttt{ThreadLocal} and inheritance:} Be mindful ofn
-    \texttt{ThreadLocal} variables, as they can quickly eat up memory in the
-    presence of a high number of virtual threads.
-  \end{itemize}
-\end{frame}
-
-\begin{frame}[fragile]
-  \frametitle{Thread pinning}
-
-  \begin{itemize}
-  \item[\faBook] \textbf{Thread pinning:} The whole point of
-    virtual threads is to enable simple, synchronous, sequential thread-per-task
-    style code. Avoid asynchronous code with callbacks.
-  \item[\faBook] \textbf{CPU-heavy tasks:} As explained earlier.
-  \item[\faBook] \textbf{:} Be mindful ofn
+  \item[\faTimes]<2-> \textbf{No need for pools:} As explained earlier.
+  \item[\faTimes]<3-> \textbf{Avoid \texttt{synchronized} blocks:} If a virtual
+    thread enters a \texttt{synchronized}, it gets \textbf{pinned} in its
+    carrier thread. If it blocks for whatever reason, it cannot be switched out.
+    Hence, one advantage of virtual threads is being negated. Use
+    \texttt{ReentrantLock} instead. \textcolor{blue}{\emph{This limitation was removed in
+        Java 24 (see JEP 491)!}}
+  \item[\faTimes]<4-> \textbf{\texttt{ThreadLocal} and inheritance:} Be mindful ofn
     \texttt{ThreadLocal} variables, as they can quickly eat up memory in the
     presence of a high number of virtual threads.
   \end{itemize}
