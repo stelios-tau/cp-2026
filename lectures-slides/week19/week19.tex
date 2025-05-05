@@ -280,7 +280,7 @@
     to create and maintain.
   \item[\faBook]<4-> \textbf{Use Case:} Designed for tasks that spend a lot of
     time blocked or waiting (I/O-bound tasks). They are not intended to speed up
-    CPU-intensive work, but to allow vastly more concurrent operations.
+    CPU-intensive work, but to allow vastly more \textbf{concurrent} operations.
   \end{itemize}
 \end{frame}
 
@@ -303,15 +303,157 @@
   \frametitle{Creating and starting virtual threads}
 
   \begin{itemize}
-
+    \item[\faBook] \textbf{Thread API Extensions:} New factory methods to create virtual threads:
+    \begin{itemize}
+    \item[\faBook] \texttt{Thread.startVirtualThread(Runnable task)} -- create and start a
+      virtual thread to run the given task.
+    \item[\faBook] \texttt{Thread.ofVirtual().start(...)} -- more flexible.
+    \end{itemize}
+    \item[\faBook] \textbf{ExecutorService Support:} Use
+      \texttt{newVirtualThreadPerTaskExecutor()} to get an ExecutorService that
+      spawns each task in its own virtual thread.
+    \item[\faBook]  \textbf{No thread pooling needed:} Because creating,
+      starting and disposing virtual threads is so cheap, pooling is not needed
+      and is discouraged.
   \end{itemize}
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Recap}
+  \frametitle{Example}
+
+\begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
+frame = trBL , firstnumber = last , escapeinside={(*@}{@*)},numbers=none]
+try (ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor()) {
+    for(int i=0; i<1000; i++) {
+        exec.submit(() -> {
+            // Task code running in a virtual thread
+            Thread.sleep(1000);
+            System.out.println("Done by " + Thread.currentThread().getName());
+            return null;
+        });
+    }
+}  // executor closes, waits for tasks to finish
+\end{lstlisting}
+  \uncover<2->{
+    \begin{itemize}
+      \item[\faLightbulb] Same API as normal threads! It is thus easy to
+        refactor old code into virtual threads.
+  \end{itemize}}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Use cases for virtual threads}
+
+  The idea is \emph{concurrency at scale}:
 
   \begin{itemize}
+  \item[\faBook] \textbf{Thread-Per-Request Server:} Imagine a server that handles
+    incoming requests by spawning a new thread for each request
+    (\emph{thread-per-request}).
+  \item[\faBook] \textbf{Database Calls in Parallel:} Suppose you need to run
+    1000 database queries concurrently. You can fire off
+    1000 virtual threads, each doing a blocking JDBC call, and let the JVM
+    figure it out.
+  \item[\faBook] \textbf{I/O Intensive Tasks:}  For something like a web
+    crawler/file-related app.
+    reading thousands of pages/files, you can assign one virtual thread per
+    URL/file (\emph{thread-per-task}).
+  \end{itemize}
+\end{frame}
 
+\begin{frame}[fragile, shrink=15]
+  \frametitle{Platform Threads vs Virtual Threads}
+
+    \begin{table}[h]
+    \centering
+    \begin{tabularx}{\textwidth}{|l|c|X|}
+      \hline
+      \textbf{Aspect} & \textbf{Platform Thread} & \textbf{Virtual Thread} \\
+      \hline
+      \textbf{Implementation} & 1-1 mapping + OS threads & Many-many mapping to
+      OS threads\\
+      \hline
+      \textbf{Footprint} & Large stack (c.a. 1MB) and OS structures
+      & Small stack (tens of KBs) \\
+      \hline
+      \textbf{Creation Cost} & Expensive, thousands of instructions & About 1000
+      times cheaper \\
+      \hline
+      \textbf{Scheduling} & OS kernel & JVM via ForkJoinPool \\
+      \hline
+      \textbf{Blocking behav.} & Blocking I/O or sleep ties OS thread
+      & Carrier thread is free\\
+      \hline
+      \textbf{Max Concurrency} & Limited by memory & Up to millions of virtual threads \\
+      \hline
+    \end{tabularx}
+    \caption{Comparison of the two types of threads in Java.}
+  \end{table}
+
+  \begin{block}<2->{\faLightbulb \quad Platform threads}
+    Suitable for CPU-bound tasks, or situations of true parallelism equal or
+    close to CPU cores.
+  \end{block}
+  \vspace{0.2cm}
+    \begin{block}<3->{\faLightbulb \quad Virtual threads}
+      Massive I/O-bound or tasks that tend to wait a lot. Great for thread-per-task designs.
+  \end{block}
+    %     \uncover<2->{
+    % \begin{tikzpicture}[overlay, remember picture]
+    %   \node[xshift=5cm,yshift=0cm,starburst,starburst points=20,
+    %   align=center,fill=yellow, opacity=1,draw=red, line width=2pt]
+    %   {\textbf{}};
+    % \end{tikzpicture}}
+
+    %     \uncover<3->{
+    % \begin{tikzpicture}[overlay, remember picture]
+    %   \node[xshift=12cm,yshift=0cm,starburst,starburst points=20,
+    %   align=center,fill=yellow, opacity=1,draw=red, line width=2pt]
+    %   {\textbf{Closed call!}};
+    % \end{tikzpicture}}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{The upside}
+
+  Consequently, with virtual threads, one can have...
+
+  \begin{itemize}
+  \item[\faBook] \textbf{High throughput:} By utilizing waiting time, virtual
+    threads can dramatically increase server throughput (requests/second) when
+    many tasks spend time blocked.
+  \item[\faBook] \textbf{Similar latency:} Virtual threads do not make single
+    operations execute faster. The latency of an individual task (say a database
+    query) remains about the same. The gain is being able to handle more tasks
+    \textbf{concurrently}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Best practices for virtual threads}
+
+  \begin{itemize}
+  \item[\faBook] \textbf{Use synchronous, blocking methods:} The whole point of
+    virtual threads is to enable simple, synchronous, sequential thread-per-task
+    style code. Avoid asynchronous code with callbacks.
+  \item[\faBook] \textbf{No need for pools:} As explained earlier.
+  \item[\faBook] \textbf{\texttt{ThreadLocal} and inheritance:} Be mindful ofn
+    \texttt{ThreadLocal} variables, as they can quickly eat up memory in the
+    presence of a high number of virtual threads.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Thread pinning}
+
+  \begin{itemize}
+  \item[\faBook] \textbf{Thread pinning:} The whole point of
+    virtual threads is to enable simple, synchronous, sequential thread-per-task
+    style code. Avoid asynchronous code with callbacks.
+  \item[\faBook] \textbf{CPU-heavy tasks:} As explained earlier.
+  \item[\faBook] \textbf{:} Be mindful ofn
+    \texttt{ThreadLocal} variables, as they can quickly eat up memory in the
+    presence of a high number of virtual threads.
   \end{itemize}
 \end{frame}
 
