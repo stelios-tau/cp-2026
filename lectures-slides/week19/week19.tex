@@ -23,7 +23,7 @@
 }
 
 \title{Concurrent Programming}
-\subtitle{Week 19 (Lecture 10) : \textbf{Virtual threads, Structured Concurrency}}
+\subtitle{Week 19 (Lecture 10) : \textbf{Virtual threads}}
 \author{Stelios Tsampas}
 \institute{
   \faEnvelope \; stelios@imada.sdu.dk
@@ -211,12 +211,12 @@
   \pause
   But this comes with its own problems:
   \begin{itemize}
-  \item[\faBook]<1-> \textbf{Callback Hell :}
+  \item[\faBook]<2-> \textbf{Callback Hell :}
     This leads to complex callback chains, which are hard read and maintain. The
     logical flow of the program gets scattered across callbacks.
-  \item[\faBook]<2-> \textbf{Debugging difficulty:} Asynchronous code does not
+  \item[\faBook]<3-> \textbf{Debugging difficulty:} Asynchronous code does not
     follow normal call stack, making debugging harder.
-  \item[\faBook]<3-> \textbf{Cognitive load:} Developers must rewrite simple
+  \item[\faBook]<4-> \textbf{Cognitive load:} Developers must rewrite simple
     sequential code into asynchronous form, which is more challenging and complex.
   \end{itemize}
 \end{frame}
@@ -465,7 +465,7 @@ try (ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor()) {
     Hence, one advantage of virtual threads is being negated. Use
     \texttt{ReentrantLock} instead. \textcolor{blue}{\emph{This limitation was removed in
         Java 24 (see JEP 491)!}}
-  \item[\faTimes]<4-> \textbf{\texttt{ThreadLocal} and inheritance:} Be mindful ofn
+  \item[\faTimes]<4-> \textbf{\texttt{ThreadLocal} and inheritance:} Be mindful of
     \texttt{ThreadLocal} variables, as they can quickly eat up memory in the
     presence of a high number of virtual threads.
   \end{itemize}
