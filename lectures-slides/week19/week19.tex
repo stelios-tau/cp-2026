@@ -293,8 +293,25 @@
   \item[\faBook]<1-> JVM can pause, park, resume virtual threads efficiently.
   \item[\faBook]<1-> Blocking (like \texttt{sleep()} or waiting on I/O) does not
     block the underlying carrier thread, but unmounts its virtual thread.
-  \item[\faBook]<1-> JVM uses scheduling tricks to keep things efficient.
-  \item[\faBook]<1-> Under the hood, JVM uses a ForkJoinPool.
+  \item[\faBook]<1-> A carrier thread can only execute one virtual thread at a
+    time. JVM uses scheduling tricks to keep things efficient.
+  \item[\faBook]<1-> Under the hood, JVM uses a ForkJoinPool (work-stealing).
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Creating and starting virtual threads}
+
+  \begin{itemize}
+
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Recap}
+
+  \begin{itemize}
+
   \end{itemize}
 \end{frame}
 
