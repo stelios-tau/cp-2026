@@ -174,8 +174,6 @@
 
   \begin{itemize}
   \item[\faBook]<1-> Virtual threads!
-  \item[\faBook]<1-> Project Loom and Structured Concurrency!
-  \item[\faBook]<1-> Outro!
   \end{itemize}
 \end{frame}
 
@@ -270,7 +268,8 @@
     Virtual threads are instances of \texttt{java.lang.Thread} that are
     not backed by a dedicated OS thread for their lifetime. They are managed by
     the JVM, much like user-mode threads (sometimes called ``green threads'').
-  \item[\faBook]<1-> \textbf{Many-to-Many\,\footnote{More like Many-to-\emph{Few}.} Mapping:}  The JVM can schedule many
+  \item[\faBook]<1-> \textbf{Many-to-Many\,\footnote{More like
+        Many-to-\emph{Few}.} Mapping:}  The JVM can schedule many
     virtual threads on a small pool of OS threads (called carrier threads). It’s
     analogous to virtual memory: many virtual threads are multiplexed onto
     limited physical threads.
@@ -297,6 +296,22 @@
     time. JVM uses scheduling tricks to keep things efficient.
   \item[\faBook]<1-> Under the hood, JVM uses a ForkJoinPool (work-stealing).
   \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{How do they work?}
+
+  \begin{center}
+    \includegraphics[width=11cm,keepaspectratio]{../media/plat-threads.jpg}
+  \end{center}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{How do they work?}
+
+  \begin{center}
+    \includegraphics[width=11cm,keepaspectratio]{../media/virt-threads.jpg}
+  \end{center}
 \end{frame}
 
 \begin{frame}[fragile]
@@ -456,19 +471,34 @@ try (ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor()) {
   \end{itemize}
 \end{frame}
 
-\section{Project Loom and Structured Concurrency}
+\begin{frame}[fragile]
+  \frametitle{References}
 
+  \begin{itemize}
+  \item[\faBook]<1-> Official Java Concurrency tutorial
+    (\href{https://docs.oracle.com/en/java/javase/21/core/concurrency.html}{https://docs.oracle.com/en/java/javase/21/core/concurrency.html})
+  \item[\faBook]<1-> JDK Enhancement Proposal 444
+    (\href{https://openjdk.org/jeps/444}{https://openjdk.org/jeps/444})
+  \item[\faBook]<1-> Rock the JVM blog post:
+    (\href{https://rockthejvm.com/articles/the-ultimate-guide-to-java-virtual-threads}{https://rockthejvm.com/articles/the-ultimate-guide-to-java-virtual-threads})
+  \item[\faBook]<1-> Blog post by Cay Horstmann:
+    (\href{https://horstmann.com/unblog/2023-06-27/index.html}{https://horstmann.com/unblog/2023-06-27/index.html})
+  \item[\faBook]<1-> More on Project Loom
+    (\href{https://www.baeldung.com/openjdk-project-loom}{https://www.baeldung.com/openjdk-project-loom})
+  \end{itemize}
 
+\end{frame}
 
 \begin{frame}[fragile]
   \frametitle{Examples  used in the lecture}
 
   \begin{itemize}
-  \item[\faCode]<1-> Week18/Starvation/TaskQueueDemo.java : example of
-    starvation.
-  \item[\faCode]<1-> Week18/Livelock/PhilosopherDemo.java : demonstrating a
-    livelock using ``polite'' philosophers.
-  \item[\faCode]<1-> Week18/Streams/* : examples with parallel Streams.
+  \item[\faCode]<1-> Week19/VirtualThreadSleepDemo.java : example of improved
+    throughput via virtual threads on blocking tasks.
+  \item[\faCode]<1-> Week19/VirtualThreadHTTPDemo.java : example of improved
+    throughput via virtual threads on HTTP requests.
+  \item[\faCode]<1-> Week19/VirtualThreads1.java and
+    Week19/VirtualThreads1.java : two more examples of virtual threads.
   \end{itemize}
 
 \end{frame}
