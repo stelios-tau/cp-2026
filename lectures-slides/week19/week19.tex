@@ -472,6 +472,28 @@ try (ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor()) {
 \end{frame}
 
 \begin{frame}[fragile]
+  \frametitle{Lecture recap}
+
+  \begin{block}{\faLightbulb \quad Virtual Threads}
+    Virtual threads are a new type of Java \texttt{Thread}s that are lighter to
+    create and schedule and are excellent for concurrency-heavy scenarios where
+    each thread is on waiting mode (not synchronizing). They provide potentially
+    much better throughput than standard threads.
+  \end{block}
+  \vspace{0.4cm}
+  \pause
+  \begin{block}{\faLightbulb \quad Structured Concurrency}
+    The other part of Project Loom, \textbf{Structured Concurrency} is currently
+    in preview. Much like structured programming saved us from GOTO's,
+    structured programming aims to bring more order to concurrent programming.
+    Feel free to explore structured concurrency online, e.g.
+    \href{https://openjdk.org/jeps/480}{https://openjdk.org/jeps/480} or the
+    official tutorial.
+  \end{block}
+
+\end{frame}
+
+\begin{frame}[fragile]
   \frametitle{References}
 
   \begin{itemize}
