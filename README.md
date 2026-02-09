@@ -1,4 +1,4 @@
-## Concurrent Programming 2025
+## Concurrent Programming 2026
 
 ### Useful notes
 
