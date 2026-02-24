@@ -14,7 +14,7 @@ class SharedCounter {
     }
 }
 
-public class RaceCondition {
+public class Counter {
     public static void main(String[] args) throws InterruptedException {
         SharedCounter counter = new SharedCounter(); //Observe that this instance is used in both threads.
 

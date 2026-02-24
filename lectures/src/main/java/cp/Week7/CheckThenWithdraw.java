@@ -1,4 +1,4 @@
-package cp.Week9.WithdrawFixed;
+package cp.Week7;
 
 class BankAccount {
     private int balance;
@@ -7,7 +7,7 @@ class BankAccount {
         this.balance = balance;
     }
 
-    public synchronized void withdraw(int amount) {
+    public void withdraw(int amount) {
         if (balance >= amount) { // Check
             try { Thread.sleep((long)(Math.random() * 100)); } catch (InterruptedException ignored) {} // Simulate random delay
             balance -= amount; // Write (another way to see the problem is add some breakpoints here)
@@ -22,7 +22,7 @@ class BankAccount {
     }
 }
 
-public class CheckThenWithdrawDemo {
+public class CheckThenWithdraw {
     public static void main(String[] args) throws InterruptedException {
         BankAccount account = new BankAccount(100); // Initial balance: 100
 

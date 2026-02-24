@@ -54,7 +54,7 @@ class GasTank {
     }
 }
 
-public class GasTankRaceDemo {
+public class GasTankRace {
     public static void main(String[] args) throws InterruptedException {
         GasTank tank = new GasTank(100);
 

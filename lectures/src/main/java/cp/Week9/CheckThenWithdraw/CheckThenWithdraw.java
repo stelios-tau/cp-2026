@@ -1,4 +1,4 @@
-package cp.Week7;
+package cp.Week9.CheckThenWithdraw;
 
 class BankAccount {
     private int balance;
@@ -22,7 +22,7 @@ class BankAccount {
     }
 }
 
-public class CheckThenWithdrawDemo {
+public class CheckThenWithdraw {
     public static void main(String[] args) throws InterruptedException {
         BankAccount account = new BankAccount(100); // Initial balance: 100
 

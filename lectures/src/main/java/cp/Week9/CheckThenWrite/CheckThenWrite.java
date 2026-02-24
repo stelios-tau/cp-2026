@@ -1,4 +1,4 @@
-package cp.Week7;
+package cp.Week9.CheckThenWrite;
 import java.util.*;
 
 class SharedList {
@@ -16,7 +16,7 @@ class SharedList {
     }
 }
 
-public class CheckThenWriteIssue {
+public class CheckThenWrite {
     public static void main(String[] args) throws InterruptedException {
         SharedList sharedList = new SharedList();
 
