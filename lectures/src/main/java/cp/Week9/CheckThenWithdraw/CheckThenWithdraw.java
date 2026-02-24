@@ -1,9 +1,9 @@
 package cp.Week9.CheckThenWithdraw;
 
-class BankAccount {
+class InsecureBankAccount {
     private int balance;
 
-    public BankAccount(int balance) {
+    public InsecureBankAccount(int balance) {
         this.balance = balance;
     }
 
@@ -24,7 +24,7 @@ class BankAccount {
 
 public class CheckThenWithdraw {
     public static void main(String[] args) throws InterruptedException {
-        BankAccount account = new BankAccount(100); // Initial balance: 100
+        InsecureBankAccount account = new InsecureBankAccount(100); // Initial balance: 100
 
         // Two threads trying to withdraw 70 each (should fail on second withdrawal)
         Thread t1 = new Thread(() -> account.withdraw(70), "ATM 1");

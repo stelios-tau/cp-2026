@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Random;
 
-class FryingPan {
+class InsecureFryingPan {
     private boolean isOccupied = false; // Shared mutable state
 
     public void use(String chefName, String dish, String step) {
@@ -25,12 +25,12 @@ class FryingPan {
     }
 }
 
-class Dish {
+class InsecureDish {
     private final String name;
     private final String[] steps;
     private int currentStep = 0;
 
-    public Dish(String name, String[] steps) {
+    public InsecureDish(String name, String[] steps) {
         this.name = name;
         this.steps = steps;
     }
@@ -52,13 +52,13 @@ class Dish {
     }
 }
 
-class Chef extends Thread {
+class InsecureChef extends Thread {
     private final String name;
-    private final List<Dish> dishes;
-    private final FryingPan pan;
+    private final List<InsecureDish> dishes;
+    private final InsecureFryingPan pan;
     private final Random random = new Random();
 
-    public Chef(String name, List<Dish> dishes, FryingPan pan) {
+    public InsecureChef(String name, List<InsecureDish> dishes, InsecureFryingPan pan) {
         this.name = name;
         this.dishes = dishes;
         this.pan = pan;
@@ -68,13 +68,13 @@ class Chef extends Thread {
         int tasksCompleted = 0;
         while (true) {
             // Randomly select a dish
-            Dish chosenDish = dishes.get(random.nextInt(dishes.size()));
+            InsecureDish chosenDish = dishes.get(random.nextInt(dishes.size()));
 
             // Try to get a step
             String step = chosenDish.getNextStep().orElse(null);
             if (step == null) {
                 // Check if all dishes are done
-                if (dishes.stream().allMatch(Dish::isCompleted)) {
+                if (dishes.stream().allMatch(InsecureDish::isCompleted)) {
                     System.out.println("🎉 " + name + " has finished all available tasks! Tasks completed: " + tasksCompleted + ".");
                     break;
                 }
@@ -85,9 +85,7 @@ class Chef extends Thread {
                 pan.use(name, chosenDish.getName(), step); // No synchronization here!
             } else {
                 System.out.println("🙃 " + name + " is working on " + chosenDish.getName() + " (" + step + ")...");
-                try {
-                    Thread.sleep(2000); // Simulate work time
-                } catch (InterruptedException ignored) {}
+                
                 System.out.println("✅ " + name + " completed " + chosenDish.getName() + " (" + step + ").");
             }
             tasksCompleted++;
@@ -97,17 +95,17 @@ class Chef extends Thread {
 
 public class CookingRaceCondition {
     public static void main(String[] args) {
-        FryingPan sharedPan = new FryingPan();
+        InsecureFryingPan sharedPan = new InsecureFryingPan();
 
-        List<Dish> dishes = new ArrayList<>();
+        List<InsecureDish> dishes = new ArrayList<>();
         
-        dishes.add(new Dish("Dish I", new String[]{"Chop tomatoes", "Chop onion", "Boil Pasta"}));
+        dishes.add(new InsecureDish("Dish I", new String[]{"Chop tomatoes", "Chop onion", "Boil Pasta"}));
         
         // The next dish is tricky!
-        dishes.add(new Dish("Dish II", new String[]{"Cook veggies in pan", "Cook meat in pan", "Add garnish"}));
+        dishes.add(new InsecureDish("Dish II", new String[]{"Cook veggies in pan", "Cook meat in pan", "Add garnish"}));
 
-        Chef chef1 = new Chef("Chef Alice", dishes, sharedPan);
-        Chef chef2 = new Chef("Chef Bob", dishes, sharedPan);
+        InsecureChef chef1 = new InsecureChef("Chef Alice", dishes, sharedPan);
+        InsecureChef chef2 = new InsecureChef("Chef Bob", dishes, sharedPan);
 
         chef1.start();
         chef2.start();

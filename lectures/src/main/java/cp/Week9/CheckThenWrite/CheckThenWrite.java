@@ -1,7 +1,7 @@
 package cp.Week9.CheckThenWrite;
 import java.util.*;
 
-class SharedList {
+class InsecureSharedList {
     private final List<String> list = new ArrayList<>(); // Shared among threads!
 
     public void addIfNotPresent(String item) {
@@ -18,7 +18,7 @@ class SharedList {
 
 public class CheckThenWrite {
     public static void main(String[] args) throws InterruptedException {
-        SharedList sharedList = new SharedList();
+        InsecureSharedList sharedList = new InsecureSharedList();
 
         Thread t1 = new Thread(() -> sharedList.addIfNotPresent("Entry1"));
         Thread t2 = new Thread(() -> sharedList.addIfNotPresent("Entry1"));

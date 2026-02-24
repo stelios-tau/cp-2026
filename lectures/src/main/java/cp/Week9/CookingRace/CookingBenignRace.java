@@ -5,12 +5,12 @@ import java.util.ArrayList;
 import java.util.Optional;
 import java.util.Random;
 
-class Dish {
+class BenignDish {
     private final String name;
     private final String[] steps;
     private int currentStep = 0;
 
-    public Dish(String name, String[] steps) {
+    public BenignDish(String name, String[] steps) {
         this.name = name;
         this.steps = steps;
     }
@@ -33,12 +33,12 @@ class Dish {
     }
 }
 
-class Chef extends Thread {
+class BenignChef extends Thread {
     private final String name;
-    private final List<Dish> dishes;
+    private final List<BenignDish> dishes;
     private final Random random = new Random();
 
-    public Chef(String name, List<Dish> dishes) {
+    public BenignChef(String name, List<BenignDish> dishes) {
         this.name = name;
         this.dishes = dishes;
     }
@@ -46,13 +46,13 @@ class Chef extends Thread {
     public void run() {
         while (true) {
             // Randomly select a dish
-            Dish chosenDish = dishes.get(random.nextInt(dishes.size()));
+            BenignDish chosenDish = dishes.get(random.nextInt(dishes.size()));
 
             // Try to get a step
             String step = chosenDish.getNextStep().orElse(null);
             if (step == null) {
                 // Check if all dishes are done
-                if (dishes.stream().allMatch(Dish::isCompleted)) {
+                if (dishes.stream().allMatch(BenignDish::isCompleted)) {
                     System.out.println("🎉 " + name + " has finished all available tasks!");
                     break;
                 }
@@ -73,12 +73,12 @@ class Chef extends Thread {
 public class CookingBenignRace {
     public static void main(String[] args) {
 
-        List<Dish> dishes = new ArrayList<>();
-        dishes.add(new Dish("Dish I", new String[]{"Chop tomatoes", "Chop onion", "Add olive oil"}));
-        dishes.add(new Dish("Dish II", new String[]{"Cook pasta in pan", "Cook meat in the oven", "Add garnish"}));
+        List<BenignDish> dishes = new ArrayList<>();
+        dishes.add(new BenignDish("Dish I", new String[]{"Chop tomatoes", "Chop onion", "Add olive oil"}));
+        dishes.add(new BenignDish("Dish II", new String[]{"Cook pasta in pan", "Cook meat in the oven", "Add garnish"}));
 
-        Chef chef1 = new Chef("Chef Alice", dishes);
-        Chef chef2 = new Chef("Chef Bob", dishes);
+        BenignChef chef1 = new BenignChef("Chef Alice", dishes);
+        BenignChef chef2 = new BenignChef("Chef Bob", dishes);
 
         chef1.start();
         chef2.start();
