@@ -1,37 +1,34 @@
-package cp.Week11.Visibility;
+package cp.Week10.Visibility;
+
 
 /*
  * Visibility issue example
- * Fixed with locking (not optimal, there is a simpler way)
+ * JVM performs optimizations in the Thread "thread"
  */
 
-class KeepsGoingFixed extends Thread {
-    boolean keepRunning = true; // Not volatile!
-    final static Object asdf = new Object();
+class KeepsGoing extends Thread {
+    boolean keepRunning = true;
 
     public void run() {
         System.out.println("🟢 " + Thread.currentThread().getName() + " started...");
-        boolean localFlag;
-        
-        do {
-            synchronized(asdf){
-                localFlag = keepRunning;
-            }
-        } while (localFlag);
+
+        while (keepRunning) {
+            // Sleep might trigger memory synchronization!
+            //try { Thread.sleep(10); } catch (InterruptedException ignored) {}
+            ;
+        }
 
         System.out.println("🔴 " + Thread.currentThread().getName() + " stopped.");
     }
 
     public static void main(String[] args) throws InterruptedException {
-        
-        KeepsGoingFixed thread = new KeepsGoingFixed();
+        KeepsGoing thread = new KeepsGoing();
         thread.start();
 
         Thread.sleep(1000); // Simulate delay
 
         System.out.println("⏳ " + System.currentTimeMillis() + " | Changing keepRunning to false...");
-        synchronized (asdf) {thread.keepRunning = false;}
-        //thread.keepRunning = false; // The thread might not see this change!
+        thread.keepRunning = false; // The thread might not see this change!
 
         System.out.println("✅ " + System.currentTimeMillis() + " | keepRunning is now false.");
     }

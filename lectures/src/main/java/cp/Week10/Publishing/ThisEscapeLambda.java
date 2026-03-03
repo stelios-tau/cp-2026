@@ -1,4 +1,4 @@
-package cp.Week11.Publishing;
+package cp.Week10.Publishing;
 
 interface EventListenerLambda {
     void onEvent(String message);

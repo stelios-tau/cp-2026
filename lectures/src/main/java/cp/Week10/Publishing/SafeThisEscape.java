@@ -1,4 +1,4 @@
-package cp.Week11.Publishing;
+package cp.Week10.Publishing;
 
 /*
  * Safe publication via factory. Immutability is at play here.

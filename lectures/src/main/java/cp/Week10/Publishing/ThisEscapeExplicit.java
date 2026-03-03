@@ -1,4 +1,4 @@
-package cp.Week11.Publishing;
+package cp.Week10.Publishing;
 
 interface EventListenerExpl {
     void onEvent(UnsafePublisher publisher);

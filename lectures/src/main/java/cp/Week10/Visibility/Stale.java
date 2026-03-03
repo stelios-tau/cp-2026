@@ -1,4 +1,4 @@
-package cp.Week11.Visibility;
+package cp.Week10.Visibility;
 
 /*
  * More involved example on visibility
@@ -6,33 +6,35 @@ package cp.Week11.Visibility;
  * value of the volatile variable itself"!
  */
 
-class SharedDataFixed {
+
+
+
+
+
+
+
+
+
+
+class SharedData {
     int number = 0; // Not volatile!
-    boolean ready = false; // Not volatile! But what if I change just that?
+    boolean ready = false; // Not volatile! 
     
-    public synchronized boolean getR() {
-        return ready;
-    }
-
-    public synchronized int getN() {
-        return number;
-    }
-
-    public synchronized void publishUpdate() {
+    public void publishUpdate() {
         number = 42;  // Step 1: Update number
         ready = true;  // Step 2: Indicate that the number is ready (but another thread might not see this!)
     }
 }
 
-class ReaderThreadFixed extends Thread {
-    private final SharedDataFixed data;
+class ReaderThread extends Thread {
+    private final SharedData data;
 
-    public ReaderThreadFixed(SharedDataFixed data) {
+    public ReaderThread(SharedData data) {
         this.data = data;
     }
 
     public void run() {
-        while (!data.getR()) {
+        while (!data.ready) {
             // Loop until `ready` is set to true (might never exit!)
         }
 
@@ -40,10 +42,10 @@ class ReaderThreadFixed extends Thread {
     }
 }
 
-public class StaleFixed {
+public class Stale {
     public static void main(String[] args) throws InterruptedException {
-        SharedDataFixed data = new SharedDataFixed();
-        ReaderThreadFixed reader = new ReaderThreadFixed(data);
+        SharedData data = new SharedData();
+        ReaderThread reader = new ReaderThread(data);
         
         reader.start();
 
