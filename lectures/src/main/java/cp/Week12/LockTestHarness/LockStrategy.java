@@ -1,4 +1,4 @@
-package cp.Week13.LockTestHarness;
+package cp.Week12.LockTestHarness;
 
 interface LockStrategy {
     void lock();

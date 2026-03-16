@@ -1,7 +1,6 @@
 package cp.Week9;
 
 /*
- * This example does not work in a 64bit build.
  * Can someone trigger it?
  */
 

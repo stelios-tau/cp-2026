@@ -1,4 +1,4 @@
-package cp.Week13.LockTestHarness;
+package cp.Week12.LockTestHarness;
 
 public class SyncVSGaren {
     private static final int NUM_THREADS = 1;

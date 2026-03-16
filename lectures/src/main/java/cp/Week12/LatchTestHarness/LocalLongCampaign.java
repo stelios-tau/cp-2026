@@ -1,4 +1,4 @@
-package cp.Week13.LatchTestHarness;
+package cp.Week12.LatchTestHarness;
 import java.util.concurrent.CountDownLatch;
 import java.util.List;
 import java.util.Arrays;

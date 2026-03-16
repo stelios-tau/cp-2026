@@ -1,4 +1,4 @@
-package cp.Week13.Maps;
+package cp.Week12.Maps;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-import cp.Week13.Words;
+import cp.Week12.Words;
 
 public class SynchronizedMap
 {

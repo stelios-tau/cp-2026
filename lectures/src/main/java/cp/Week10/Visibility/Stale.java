@@ -17,7 +17,7 @@ package cp.Week10.Visibility;
 
 
 class SharedData {
-    int number = 0; // Not volatile!
+    volatile int number = 0; // Not volatile!
     boolean ready = false; // Not volatile! 
     
     public void publishUpdate() {

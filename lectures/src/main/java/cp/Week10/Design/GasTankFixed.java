@@ -32,6 +32,7 @@ package cp.Week10.Design;
             currentAmount += amount;
             System.out.println(Thread.currentThread().getName() + " ✅ Stored " + amount + " gas. New amount: " + currentAmount);
         }
+    
     }
 
     public void printStatus() {
