@@ -768,19 +768,19 @@ Implementation & Wrapper around regular \texttt{Map} with \texttt{synchronized}
 
   \begin{itemize}
   \item[\faCode]<1-> LockTestHarness/Spinlock.java: Spinlock implementation
-  \item[\faCode]<1-> LockTestHarness/LockTestHarness.java: Spinlock vs
+  \item[\faCode]<1-> LockTestHarness/SyncVSGaren.java: Spinlock vs
     \texttt{synchronized} (single-run)
-  \item[\faCode]<1-> LockTestHarness/LockTestHarness2.java: Spinlock vs
+  \item[\faCode]<1-> LockTestHarness/SyncVSGarenCampaign.java: Spinlock vs
     \texttt{synchronized} (benchmark)
-  \item[\faCode]<1-> LatchTestHarness/LatchTestHarness.java: Latch (local
+  \item[\faCode]<1-> LatchTestHarness/GlobalVSLocal.java: Latch (local
     updates) vs
     \texttt{synchronized} (single)
-  \item[\faCode]<1-> LatchTestHarness/LatchTestHarness2.java: Latch (local
+  \item[\faCode]<1-> LatchTestHarness/GlobalVSLocalCampaign.java: Latch (local
     updates) vs
     \texttt{synchronized} (benchmark)
-  \item[\faCode]<1-> LatchTestHarness/LatchTestHarness2Long.java: Proper
+  \item[\faCode]<1-> LatchTestHarness/LocalLongCampaign.java: Proper
     benchmarking for latching and local updates using \texttt{long}'s.
-  \item[\faCode]<1-> LatchTestHarness/LatchTestHarness2LongMap.java: Latch
+  \item[\faCode]<1-> LatchTestHarness/LocalVSMapCampaign.java: Latch
     (local updates) vs \texttt{ConcurrentHashMap}.
   \end{itemize}
 
