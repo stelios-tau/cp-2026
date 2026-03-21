@@ -23,7 +23,7 @@
 }
 
 \title{Concurrent Programming}
-\subtitle{Week 14 (Lecture 7) : \textbf{Queues, tasks and executors}}
+\subtitle{Week 13 (Lecture 7) : \textbf{Queues, tasks and executors}}
 \author{Stelios Tsampas}
 \institute{
   \faEnvelope \; stelios@imada.sdu.dk
@@ -32,8 +32,6 @@
   \href{https://www.steliostsampas.com}{https://www.steliostsampas.com}
   \\\\\
   \faGithub \; stelios-tau/cp-2025
-  \qquad\;\;
-    \faDiscord \; cp-2025
 }
 \date{\today}
 
@@ -167,22 +165,37 @@
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Another look at the benchmarks}
+  \frametitle{One important nuance}
 
-  \begin{itemize}
-  \item[\faBook]<1-> The benchmarks presented last week were not very thorough.
-  \item[\faBook]<1-> They only covered a situation where each ``task'', each
-    increment, took a very small amount of time to be completed.
-  \item[\faBook]<1-> In addition, the performance of \texttt{ConcurrentHashMap}
-    was not properly tested against \texttt{synchronized} locking.
-  \end{itemize}
+  \begin{block}<1->{\faLightbulb \quad Key takeaway}
+    The more computation intensive an independent task is, the more negligible
+    the synchronization overhead is.
+  \end{block}
 
   \vspace{0.4cm}
 
-  \begin{block}<2->{\faSearch \quad Question}
-    What if we increase the time each increment takes?
+  \begin{block}<2->{\faLightbulb \quad Key takeaway}
+    The larger the serialized part is, the less one stands to gain from parallelism.
+  \end{block}
+
+  \vspace{0.4cm}
+
+  \begin{block}<3->{\faLightbulb \quad Amdahl's law}
+    \[
+      \mathrm{Speedup} \leq \frac{1}{F + \frac{1-F}{N}}
+    \]
+    In the above, $N$ is the number of threads and $F$ the \emph{fraction} of
+    the \emph{serialized} code.
   \end{block}
 \end{frame}
+
+% \begin{frame}[fragile]
+%   \frametitle{Recall an important nuance}
+
+%   \begin{block}<2->{\faLightbulb \quad Relative overhead}
+%     The synchronization overhead
+%   \end{block}
+% \end{frame}
 
 % Delay of 8, 1024 increments
 % 32 available processors
@@ -204,7 +217,7 @@
 % ConcurrentMap & 64 &     1024 & 137.65 ms \
 
 \begin{frame}[fragile]
-  \frametitle{\texttt{synchronized} vs \texttt{ConcurrentHashMap} on 8ms}
+  \frametitle{\texttt{synchronized} vs \texttt{ConcurrentHashMap}}
 
   \begin{center}
     \begin{tikzpicture}
@@ -275,32 +288,7 @@
   \end{center}
 \end{frame}
 
-\begin{frame}[fragile]
-  \frametitle{Simple math}
 
-  \begin{block}<1->{\faLightbulb \quad Key takeaway}
-    The more computation intensive an independent task is, the more negligible
-    the synchronization overhead is.
-  \end{block}
-
-  \vspace{0.4cm}
-
-  \begin{block}<2->{\faLightbulb \quad Key takeaway}
-    The larger the serialized part is, the less one stands to gain from parallelism.
-  \end{block}
-
-  \vspace{0.4cm}
-
-  \begin{block}<3->{\faLightbulb \quad Amdahl's law}
-    \[
-      \mathrm{Speedup} \leq \frac{1}{F + \frac{1-F}{N}}
-    \]
-    In the above, $N$ is the number of threads and $F$ the \emph{fraction} of
-    the \emph{serialized} code.
-  \end{block}
-
-
-\end{frame}
 
 \begin{frame}[fragile]
   \frametitle{Last week's challenge}
