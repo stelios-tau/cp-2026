@@ -468,7 +468,7 @@ class SharedBuffer {
     public synchronized String consume() throws InterruptedException {
         while (buffer.isEmpty()) wait();
         String item = buffer.remove();
-        notifyAll(); // Signal waiting producers
+        notify(); // Signal waiting producers
         return item;
     }
 }\end{lstlisting}
@@ -602,6 +602,39 @@ String last  = deque.removeLast();  // 🍅
     stack-LIFO (\texttt{push} and \texttt{pop}).
   \end{block}
 
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Stopping  in \texttt{BlockingQueue}-based producer-consumers}
+
+  \begin{enumerate}
+  \item Stop producing new tasks.
+  \item Insert the so-called \emph{poison-pill} tasks in the queue.
+  \item Terminate the producer.
+  \end{enumerate}
+  \vspace{0.6cm}
+  \begin{block}<2->{\faSkullCrossbones \quad Poison-pills}
+    Special tasks that signal consuming threads to return.
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Poison pills}
+
+  \begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
+frame = trBL , firstnumber = last , escapeinside={(*@}{@*)},numbers=none]
+BlockingQueue<String> queue = new LinkedBlockingQueue<>();
+
+// Producer thread
+queue.put("Chop tomatoes");
+
+// Consumer thread
+String task = queue.take();
+if (task.equals("Poison"))
+    return;
+System.out.println("Working on: " + task);
+
+\end{lstlisting}
 \end{frame}
 
 \section{Executors}
