@@ -1,4 +1,4 @@
-package cp.Week14.WaitNotify;
+package cp.Week13.WaitNotify;
 
 import java.util.LinkedList;
 import java.util.Queue;
@@ -38,8 +38,8 @@ public class WaitNotifyDemo {
         });
 
         // Reverse the start order to show race
-        producer.start();
-        Thread.sleep(100); // Let producer finish first
         consumer.start();
+        //Thread.sleep(100); // Let producer finish first
+        producer.start();
     }
 }

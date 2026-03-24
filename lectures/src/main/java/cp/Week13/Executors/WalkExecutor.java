@@ -1,4 +1,4 @@
-package cp.Week14.Executors;
+package cp.Week13.Executors;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,7 +25,6 @@ public class WalkExecutor
 				.filter( Files::isRegularFile )
 				.forEach( filepath -> {
 					executor.submit( () -> {
-						computeOccurrences( filepath, occurrences );
 					} );
 				} );
 		} catch( IOException e ) {
@@ -35,6 +34,7 @@ public class WalkExecutor
 		try {
 			executor.shutdown();
 			executor.awaitTermination( 1, TimeUnit.DAYS );
+			executor.shutdownNow();
 		} catch( InterruptedException e ) {
 			e.printStackTrace();
 		}

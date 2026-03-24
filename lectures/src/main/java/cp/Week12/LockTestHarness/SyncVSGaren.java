@@ -1,8 +1,8 @@
 package cp.Week12.LockTestHarness;
 
 public class SyncVSGaren {
-    private static final int NUM_THREADS = 4;
-    private static final int INCREMENTS_PER_THREAD = 2_000_000;
+    private static final int NUM_THREADS = 8;
+    private static final int INCREMENTS_PER_THREAD = 50_000_000;
     private static int counter = 0;
 
     public static void main(String[] args) throws InterruptedException {

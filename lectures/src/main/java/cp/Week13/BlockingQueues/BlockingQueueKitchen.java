@@ -1,4 +1,4 @@
-package cp.Week14.BlockingQueues;
+package cp.Week13.BlockingQueues;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;

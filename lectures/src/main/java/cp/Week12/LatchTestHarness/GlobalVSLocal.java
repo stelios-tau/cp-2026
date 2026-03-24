@@ -2,8 +2,8 @@ package cp.Week12.LatchTestHarness;
 import java.util.concurrent.CountDownLatch;
 
 public class GlobalVSLocal {
-    private static final int NUM_THREADS = 12;
-    private static final long TOTAL_INCREMENTS = 1_000_000_000L;
+    private static final int NUM_THREADS = 16; //12
+    private static final long TOTAL_INCREMENTS = 100_000_000_000L;
     // 10_000_000_000_000L for the optimized case in about 15 seconds on my PC
     // 2_000_000_000L for the unoptimized case in 8 seconds on my PC
     private static long sharedCounter = 0L;
@@ -11,7 +11,7 @@ public class GlobalVSLocal {
 
     public static void main(String[] args) throws InterruptedException {
         System.out.println("Scenario 1: Global counter (synchronized only)");
-        runGlobalCounter();
+        //runGlobalCounter();
 
         System.out.println("\nScenario 2: Local counter + Latch");
         runLocalCounterWithLatch();

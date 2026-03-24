@@ -8,11 +8,11 @@ public class SyncVSGarenCampaign {
     // Benchmark settings
     // private static final List<Integer> numThreadsList = Arrays.asList(1, 2, 4, 8);
     // private static final List<Integer> incrementsPerThreadList = Arrays.asList(4_000_000);
-    private static final List<Integer> numThreadsList = Arrays.asList(4);
-    private static final List<Integer> incrementsPerThreadList = Arrays.asList(500);
-    private static final int repetitions = 1;
-    private static final int innerdelay = 1; //Simulate time spent in critical section
-    private static final int outdelay = 1; //Simulate time spent outside of critical section
+    private static final List<Integer> numThreadsList = Arrays.asList(2,4,8);
+    private static final List<Integer> incrementsPerThreadList = Arrays.asList(128);
+    private static final int repetitions = 3;
+    private static final int innerdelay = 2; //Simulate time spent in critical section
+    private static final int outdelay = 0; //Simulate time spent outside of critical section
 
     public static void main(String[] args) throws InterruptedException {
         System.out.println("Benchmark: SpinLock");
@@ -21,8 +21,8 @@ public class SyncVSGarenCampaign {
         System.out.println("\nBenchmark: synchronized");
         runBenchmarkSynchronized();
 
-        System.out.println("\nBenchmark: Nothing");
-        runBenchmark("SpinLock", new Nothing());
+        //System.out.println("\nBenchmark: Nothing");
+        //runBenchmark("SpinLock", new Nothing());
     }
 
     private static void runBenchmark(String label, LockStrategy lock) throws InterruptedException {
