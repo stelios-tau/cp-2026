@@ -1,20 +1,19 @@
-package cp.Week18.Streams;
+package cp.Week17.Streams;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import cp.Words;
 
-public class WalkParallelStream5
+public class WalkParallelStreamFindAny
 {
 	public static void main(String[] args)
 	{
 		try {
-			Map< String, Integer > occurrences =
+			boolean found =
 				Files
 					.walk( Paths.get( "lectures/data" ) )
 					.filter( Files::isRegularFile )
@@ -28,13 +27,8 @@ public class WalkParallelStream5
 						}
 					} )
 					.flatMap( Words::extractWords )
-					.map( String::toLowerCase )
-					.collect( Collectors.toMap(
-						word -> word,
-						word -> 1,
-						Integer::sum
-					) );
-//			occurrences.forEach( (word, n) -> System.out.println( word + ": " + n ) );
+					.anyMatch( word -> word.equals( "ipsum" ) );
+			System.out.println( found );
 		} catch( IOException e ) {
 			e.printStackTrace();
 		}

@@ -1,17 +1,16 @@
-package cp.Week18.Streams;
+package cp.Week17.Streams;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import cp.Words;
 
-
-public class WalkParallelStream4
+public class WalkParallelStream2
 {
 	public static void main(String[] args)
 	{
@@ -23,21 +22,24 @@ public class WalkParallelStream4
 				.walk( Paths.get( "lectures/data" ) )
 				.filter( Files::isRegularFile )
 				.collect( Collectors.toList() )
-				.parallelStream()
-				.flatMap( textFile -> {
-					try {
-						return Files.lines( textFile );
-					} catch( IOException e ) {
-						return Stream.empty();
-					}
-				} )
+				.parallelStream() // .stream().parallel()
+				.forEach( filepath -> computeOccurrences( filepath, occurrences ) );
+		} catch( IOException e ) {
+			e.printStackTrace();
+		}
+		
+//		occurrences.forEach( (word, n) -> System.out.println( word + ": " + n ) );
+	}
+	
+	private static void computeOccurrences( Path textFile, Map< String, Integer > occurrences )
+	{
+		try {
+			Files.lines( textFile )
 				.flatMap( Words::extractWords )
 				.map( String::toLowerCase )
 				.forEach( s -> occurrences.merge( s, 1, Integer::sum ) );
 		} catch( IOException e ) {
 			e.printStackTrace();
 		}
-		
-//		occurrences.forEach( (word, n) -> System.out.println( word + ": " + n ) );
 	}
 }

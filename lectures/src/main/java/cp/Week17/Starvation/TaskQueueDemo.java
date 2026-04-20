@@ -1,4 +1,4 @@
-package cp.Week18.Starvation;
+package cp.Week17.Starvation;
 
 import java.util.concurrent.*;
 

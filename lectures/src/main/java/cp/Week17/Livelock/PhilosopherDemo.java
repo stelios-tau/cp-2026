@@ -1,4 +1,4 @@
-package cp.Week18.Livelock;
+package cp.Week17.Livelock;
 
 public class PhilosopherDemo {
 

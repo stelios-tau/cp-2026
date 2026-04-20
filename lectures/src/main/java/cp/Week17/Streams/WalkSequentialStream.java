@@ -1,28 +1,25 @@
-package cp.Week18.Streams;
+package cp.Week17.Streams;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 import cp.Words;
 
-public class WalkParallelStream2
+public class WalkSequentialStream
 {
 	public static void main(String[] args)
 	{
 		// word -> number of times it appears over all files
-		Map< String, Integer > occurrences = new ConcurrentHashMap<>();
+		Map< String, Integer > occurrences = new HashMap<>();
 		
 		try {
 			Files
 				.walk( Paths.get( "lectures/data" ) )
 				.filter( Files::isRegularFile )
-				.collect( Collectors.toList() )
-				.parallelStream() // .stream().parallel()
 				.forEach( filepath -> computeOccurrences( filepath, occurrences ) );
 		} catch( IOException e ) {
 			e.printStackTrace();
