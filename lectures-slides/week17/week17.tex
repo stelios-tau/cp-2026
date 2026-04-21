@@ -297,7 +297,7 @@ Thread t2 = new Thread(() -> {
 \end{frame}
 
 \begin{frame}[fragile]
-  \title{Wait-for-graph}
+  \frametitle{Resource allocation graph}
 
   \begin{center}
     \begin{tikzpicture}[
@@ -314,10 +314,10 @@ Thread t2 = new Thread(() -> {
       \node[lock, below=of T2] (B) {Lock B};
 
       % Arrows
-      \draw[arrow] (T1) -- (A);
-      \draw[arrow] (T2) -- (B);
-      \draw[arrow,purple,dashed] (B) -- (T1);
-      \draw[arrow,purple,dashed] (A) to[bend right=50] (T2);
+      \draw[arrow] (A) -- (T1);
+      \draw[arrow] (B) -- (T2);
+      \draw[arrow,purple,dashed] (T1) -- (B);
+      \draw[arrow,purple,dashed] (T2) to[bend left=20] (A);
 
     \end{tikzpicture}
   \end{center}
@@ -356,7 +356,7 @@ Thread t3 = new Thread(() -> {
 \end{frame}
 
 \begin{frame}[fragile]
-  \title{Wait-for-graph}
+  \frametitle{Resource allocation graph}
 
   \begin{center}
     \begin{tikzpicture}[
@@ -376,12 +376,12 @@ Thread t3 = new Thread(() -> {
       \node[lock, below=of T3] (C) {Lock C};
 
       % Arrows
-      \draw[arrow] (T1) -- (A);
-      \draw[arrow] (T2) -- (B);
-      \draw[arrow,purple,dashed] (B) -- (T1);
-      \draw[arrow] (T3) -- (C);
-      \draw[arrow,purple,dashed] (C) -- (T2);
-      \draw[arrow,purple,dashed] (A) to[bend right=50] (T3);
+      \draw[arrow] (A) -- (T1);
+      \draw[arrow] (B) -- (T2);
+      \draw[arrow,purple,dashed] (T1) -- (B);
+      \draw[arrow] (C) -- (T3);
+      \draw[arrow,purple,dashed] (T2) -- (C);
+      \draw[arrow,purple,dashed] (T3) to[bend left=40] (A);
 
     \end{tikzpicture}
   \end{center}
@@ -765,6 +765,9 @@ frame = trBL , firstnumber = last , escapeinside={(*@}{@*)},numbers=none]
     \end{enumerate}
   \end{block}
 
+  \begin{block}<2->{\faLightbulb \quad Haskell analogue}
+    Think about \texttt{map} and \texttt{fold} or \texttt{foldMap}.
+  \end{block}
 \end{frame}
 
 \section{Some info on the Exam}
