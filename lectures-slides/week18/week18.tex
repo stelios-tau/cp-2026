@@ -23,7 +23,7 @@
 }
 
 \title{Concurrent Programming}
-\subtitle{Week 19 (Lecture 10) : \textbf{Virtual threads}}
+\subtitle{Week 18 (Lecture 10) : \textbf{Virtual threads}}
 \author{Stelios Tsampas}
 \institute{
   \faEnvelope \; stelios@imada.sdu.dk
@@ -32,8 +32,6 @@
   \href{https://www.steliostsampas.com}{https://www.steliostsampas.com}
   \\\\\
   \faGithub \; stelios-tau/cp-2025
-  \qquad\;\;
-    \faDiscord \; cp-2025
 }
 \date{\today}
 
@@ -192,7 +190,7 @@
     thousands of CPU instructions and a large memory stack (often ~1MB). This
     \emph{scales badly}.
   \item[\faBook]<3-> \textbf{Limited Concurrency:} As such, only a limited number of
-    platform threads can run (bottleneck reached before CPU/Netowrk limit).
+    platform threads can run (bottleneck reached before CPU/network limit).
     Can't create millions of threads.
   \item[\faBook]<4-> \textbf{Thread-per-task not feasible:} In server apps with
     many concurrent requests mostly on waiting mode (I/O bound), having one OS
@@ -212,7 +210,7 @@
   But this comes with its own problems:
   \begin{itemize}
   \item[\faBook]<2-> \textbf{Callback Hell :}
-    This leads to complex callback chains, which are hard read and maintain. The
+    This leads to complex callback chains, which are hard to read and maintain. The
     logical flow of the program gets scattered across callbacks.
   \item[\faBook]<3-> \textbf{Debugging difficulty:} Asynchronous code does not
     follow normal call stack, making debugging harder.
