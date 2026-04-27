@@ -470,7 +470,7 @@ try (ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor()) {
 \end{frame}
 
 \begin{frame}[fragile]
-  \frametitle{Lecture recap}
+  \frametitle{Project Loom}
 
   \begin{block}{\faLightbulb \quad Virtual Threads}
     Virtual threads are a new type of Java \texttt{Thread}s that are lighter to
@@ -484,12 +484,71 @@ try (ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor()) {
     The other part of Project Loom, \textbf{Structured Concurrency} is currently
     in preview. Much like structured programming saved us from GOTO's,
     structured concurrency aims to bring more order to concurrent programming.
-    Feel free to explore structured concurrency online, e.g.
-    \href{https://openjdk.org/jeps/480}{https://openjdk.org/jeps/480} or the
-    official tutorial.
+    % Feel free to explore structured concurrency online, e.g.
+    % \href{https://openjdk.org/jeps/480}{https://openjdk.org/jeps/480} or the
+    % official tutorial.
   \end{block}
 
 \end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Key idea of Structured Concurrency}
+
+  \begin{itemize}
+  \item[\faBook]<1-> It is often that a program can be broken down in
+    a set of concurrent \emph{tasks}.
+  \item[\faBook]<1-> What happens when a task also consists of smaller
+    concurrent tasks?
+  \end{itemize}
+
+  \begin{block}<2->{\faLightbulb \quad Scope}
+    In structured concurrency, each task is assigned its own \emph{scope}, under
+    which it can spawn its own \emph{subtasks}. Think blocks in structured
+    programming!
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Tree-like structure of tasks}
+  \begin{tikzpicture}[
+  task/.style={
+    draw, rounded corners,
+    minimum width=1cm,
+    minimum height=1cm,
+    align=center,
+    font=\small
+  },
+  root/.style={task, draw=blue!60, fill=blue!8, font=\bfseries},
+  green/.style={task, draw=green!50!black, fill=green!8},
+  orange/.style={task, draw=orange!80!black, fill=orange!10},
+  purple/.style={task, draw=purple!70!black, fill=purple!8},
+  edge from parent/.style={draw, thick},
+  level 1/.style={sibling distance=5cm, level distance=1.8cm},
+  level 2/.style={sibling distance=2cm, level distance=1.7cm},
+  level 3/.style={sibling distance=1.8cm, level distance=1.6cm}
+]
+
+\node[root] {Main Task\\ \normalfont(root scope)}
+  child { node[green] {Subtask A\\ \normalfont(child scope)}
+    child { node[green] {A1\\ \normalfont(subtask)} }
+    child { node[green] {A2\\ \normalfont(subtask)} }
+  }
+  child { node[orange] {Subtask B\\ \normalfont(child scope)}
+    child { node[orange] {B1\\ \normalfont(subtask)} }
+    child { node[orange] {B2\\ \normalfont(subtask)}
+      child { node[orange] {B2.1\\ \normalfont(subtask)} }
+      child { node[orange] {B2.2\\ \normalfont(subtask)} }
+    }
+  }
+  child { node[purple] {Subtask C\\ \normalfont(child scope)}
+    child { node[purple] {C1\\ \normalfont(subtask)} }
+    child { node[purple] {C2\\ \normalfont(subtask)} }
+    child { node[purple] {C3\\ \normalfont(subtask)} }
+  };
+
+\end{tikzpicture}
+\end{frame}
+
 
 \begin{frame}[fragile]
   \frametitle{References}
@@ -505,6 +564,7 @@ try (ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor()) {
     (\href{https://horstmann.com/unblog/2023-06-27/index.html}{https://horstmann.com/unblog/2023-06-27/index.html})
   \item[\faBook]<1-> More on Project Loom
     (\href{https://www.baeldung.com/openjdk-project-loom}{https://www.baeldung.com/openjdk-project-loom})
+    \item[\faBook]<1-> Structured Concurrency presentation (\href{https://www.youtube.com/watch?v=IosvCU9qM5M}{https://www.youtube.com/watch?v=IosvCU9qM5M})
   \end{itemize}
 
 \end{frame}
@@ -520,8 +580,8 @@ try (ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor()) {
   \item[\faCode]<1-> Week19/VirtualThreads1.java and
     Week19/VirtualThreads2.java : two more examples of virtual threads.
   \end{itemize}
-
 \end{frame}
+
 
 \begin{frame}{}
   \centering \huge

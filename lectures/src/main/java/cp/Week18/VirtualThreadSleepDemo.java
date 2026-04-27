@@ -1,4 +1,4 @@
-package cp.Week19;
+package cp.Week18;
 
 import java.util.concurrent.*;
 
@@ -21,7 +21,7 @@ public class VirtualThreadSleepDemo {
         for (int i = 0; i < TASK_COUNT; i++) {
             executor.submit(() -> {
                 try {
-                    Thread.sleep(2000); // Simulate blocking work
+                    Thread.sleep(200); // Simulate blocking work
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 } finally {

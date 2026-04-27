@@ -1,4 +1,4 @@
-package cp.Week19;
+package cp.Week18;
 
 import java.io.IOException;
 import java.net.URI;
@@ -62,10 +62,10 @@ public class VirtualThreads2
 		List< Thread > threads = new ArrayList<>();
 
 		uriStream
-			.collect( Collectors.toList() )
+			.collect( Collectors.toList() ) //turn to list
 			// .parallel()
 			.forEach( uri ->
-				threads.add( Thread.ofVirtual().unstarted( () -> {
+				threads.add( Thread.ofVirtual().unstarted( () -> { //add threads
 					System.out.println( uri.toString() );
 					HttpRequest request = HttpRequest.newBuilder().GET().uri( uri ).build();
 					try {
