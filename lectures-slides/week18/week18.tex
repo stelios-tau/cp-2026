@@ -500,7 +500,7 @@ try (ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor()) {
   \item[\faBook]<1-> What happens when a task also consists of smaller
     concurrent tasks?
   \end{itemize}
-
+  \vspace{0.8cm}
   \begin{block}<2->{\faLightbulb \quad Scope}
     In structured concurrency, each task is assigned its own \emph{scope}, under
     which it can spawn its own \emph{subtasks}. Think blocks in structured
@@ -549,6 +549,111 @@ try (ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor()) {
 \end{tikzpicture}
 \end{frame}
 
+\begin{frame}[fragile]
+  \frametitle{Unstructured concurrency flattens trees}
+  \begin{tikzpicture}[
+  task/.style={
+    draw, rounded corners,
+    minimum width=1cm,
+    minimum height=1cm,
+    align=center,
+    font=\small
+  },
+  root/.style={task, draw=blue!60, fill=blue!8, font=\bfseries},
+  green/.style={task, draw=green!50!black, fill=green!8},
+  orange/.style={task, draw=orange!80!black, fill=orange!10},
+  purple/.style={task, draw=purple!70!black, fill=purple!8},
+  edge from parent/.style={thick},
+  level 1/.style={sibling distance=5cm, level distance=1.8cm},
+  level 2/.style={sibling distance=2cm, level distance=1.7cm},
+  level 3/.style={sibling distance=1.8cm, level distance=1.6cm}
+]
+
+\node[root] {Main Task\\ \normalfont(root scope)}
+  child { node[purple] {C2\\ \normalfont(subtask)} 
+    child { node[orange] {B1\\ \normalfont(subtask)} }
+    child { node[green] {A2\\ \normalfont(subtask)} }
+  }
+  child { node[orange] {Subtask B\\ \normalfont(child scope)}
+    child { node[green] {A1\\ \normalfont(subtask)} }
+    child { node[orange] {B2\\ \normalfont(subtask)}
+      child { node[orange] {B2.1\\ \normalfont(subtask)} }
+      child { node[purple] {C3\\ \normalfont(subtask)} }
+    }
+  }
+  child { node[purple] {Subtask C\\ \normalfont(child scope)}
+    child { node[purple] {C1\\ \normalfont(subtask)} }
+    child { node[orange] {B2.2\\ \normalfont(subtask)} }
+    child { node[green] {Subtask A\\ \normalfont(child scope)}}
+  };
+
+\end{tikzpicture}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Unstructured concurrency flattens trees}
+  \begin{tikzpicture}[
+  task/.style={
+    draw, rounded corners,
+    minimum width=2.2cm,
+    minimum height=0.85cm,
+    align=center,
+    font=\small
+  },
+  root/.style={task, draw=blue!60, fill=blue!8, font=\bfseries},
+  green/.style={task, draw=green!50!black, fill=green!8},
+  orange/.style={task, draw=orange!80!black, fill=orange!10},
+  purple/.style={task, draw=purple!70!black, fill=purple!8},
+  lost/.style={draw=gray!60, dashed, thick, -}
+]
+
+% Nodes in an intentionally non-hierarchical layout
+\node[root]   (main) at (0,0) {Main Task};
+
+\node[green]  (A)    at (-3.8,1.8) {Subtask A};
+\node[orange] (B)    at (3.5,1.5) {Subtask B};
+\node[purple] (C)    at (0,-3.0) {Subtask C};
+
+\node[green]  (A1)   at (-5.0,-0.8) {A1};
+\node[green]  (A2)   at (-2.0,-2.3) {A2};
+
+\node[orange] (B1)   at (1.8,3.4) {B1};
+\node[orange] (B2)   at (5.0,-0.6) {B2};
+\node[orange] (B21)  at (2.8,-2.4) {B2.1};
+\node[orange] (B22)  at (5.2,2.9) {B2.2};
+
+\node[purple] (C1)   at (-1.0,3.2) {C1};
+\node[purple] (C2)   at (-4.4,-3.0) {C2};
+\node[purple] (C3)   at (0.9,-1.2) {C3};
+
+% Optional faint/dashed "lost structure" connections
+\draw[lost,visible on=<2->] (main) -- (A);
+\draw[lost,visible on=<2->] (main) -- (B);
+\draw[lost,visible on=<2->] (main) -- (C);
+
+\draw[lost,visible on=<2->] (A) -- (A1);
+\draw[lost,visible on=<2->] (A) -- (A2);
+
+\draw[lost,visible on=<2->] (B) -- (B1);
+\draw[lost,visible on=<2->] (B) -- (B2);
+\draw[lost,visible on=<2->] (B2) -- (B21);
+\draw[lost,visible on=<2->] (B2) -- (B22);
+
+\draw[lost,visible on=<2->] (C) -- (C1);
+\draw[lost,visible on=<2->] (C) -- (C2);
+\draw[lost,visible on=<2->] (C) -- (C3);
+\end{tikzpicture}
+
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Tree-like structure of tasks}
+  \begin{itemize}
+  \item[\faBook]<1-> There are practical benefits in reflecting the tree-like
+    structure in the code, leading to graceful management of tasks/threads.
+  \item[\faBook]<1-> 
+  \end{itemize}
+\end{frame}
 
 \begin{frame}[fragile]
   \frametitle{References}
