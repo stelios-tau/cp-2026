@@ -651,8 +651,40 @@ try (ExecutorService exec = Executors.newVirtualThreadPerTaskExecutor()) {
   \begin{itemize}
   \item[\faBook]<1-> There are practical benefits in reflecting the tree-like
     structure in the code, leading to graceful management of tasks/threads.
-  \item[\faBook]<1-> 
+  \item[\faBook]<1-> \textbf{If a task splits into concurrent subtasks, then
+      the all subtasks return to the same ``parent'' block}.
   \end{itemize}
+  \vspace{0.2cm}
+  \begin{block}<2->{\faLightbulb \quad Workflow}
+    \begin{enumerate}
+    \item Open a new scope, like \texttt{StructuredTaskScope}.
+    \item Fork subtasks.
+    \item Join subtasks.
+    \item Propagate errors.
+    \end{enumerate}
+  \end{block}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Basic usage}
+  \begin{lstlisting}[basicstyle=\fontsize{8}{9}\selectfont\ttfamily, language = Java ,
+frame = trBL , firstnumber = last , escapeinside={(*@}{@*)},numbers=none]
+
+try (var scope = new StructuredTaskScope.ShutdownOnFailure()) {
+
+    Future<String> user  = scope.fork(() -> fetchUser());
+    Future<Integer> order = scope.fork(() -> fetchOrder());
+
+    scope.join();           // wait for all
+    scope.throwIfFailed();  // propagate errors
+
+    return user.resultNow() + " " + order.resultNow();
+  }
+\end{lstlisting}
+
+  This is the \emph{default} joiner, which cancels the scope if any subtasks
+  fail and returns nothing if successful.
+
 \end{frame}
 
 \begin{frame}[fragile]
